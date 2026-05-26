@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hsk4-v14-dorongyee';
+const CACHE_NAME = 'hsk4-v16-noauth';
 const ASSETS = [
   '/',
   '/index.html',
