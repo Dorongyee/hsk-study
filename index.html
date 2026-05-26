@@ -1,0 +1,2755 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a1a2e">
+<title>HSK 4 Review</title>
+<link rel="manifest" href="manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3/dist/index.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg: #0f0f1a;
+  --card: #1a1a2e;
+  --card2: #16213e;
+  --accent: #e94560;
+  --accent2: #0f3460;
+  --text: #eee;
+  --text2: #aaa;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --radius: 16px;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+.app { max-width: 480px; margin: 0 auto; padding-bottom: 80px; }
+
+/* Bottom Nav */
+.nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--card);
+  border-top: 1px solid #333;
+  display: flex; justify-content: space-around;
+  padding: 8px 0 env(safe-area-inset-bottom, 8px);
+  z-index: 100;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 4px 12px; cursor: pointer; color: var(--text2);
+  font-size: 11px; border: none; background: none;
+  transition: color .2s;
+}
+.nav-item.active { color: var(--accent); }
+.nav-item svg { width: 24px; height: 24px; margin-bottom: 2px; }
+
+/* Pages */
+.page { display: none; padding: 16px; }
+.page.active { display: block; }
+
+/* Header */
+.page-header {
+  font-size: 22px; font-weight: 700;
+  margin-bottom: 16px; padding-top: 8px;
+}
+.page-header small { font-size: 13px; color: var(--text2); display: block; margin-top: 4px; }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px; margin-bottom: 12px;
+  cursor: pointer; transition: transform .15s;
+}
+.card:active { transform: scale(0.98); }
+.card-title { font-size: 16px; font-weight: 600; }
+.card-sub { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+/* Level badges */
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 8px;
+  font-size: 11px; font-weight: 600; margin-right: 6px;
+}
+.badge-12 { background: #22c55e33; color: #4ade80; }
+.badge-3 { background: #3b82f633; color: #60a5fa; }
+.badge-4 { background: #ef444433; color: #f87171; }
+
+/* Quiz */
+.quiz-container { padding: 16px; }
+.quiz-progress {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 16px; font-size: 13px; color: var(--text2);
+}
+.progress-bar {
+  flex: 1; height: 4px; background: #333; border-radius: 2px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: var(--accent); transition: width .3s;
+}
+.quiz-korean {
+  font-size: 16px; line-height: 1.6; margin-bottom: 16px;
+  padding: 12px; background: var(--card2); border-radius: 12px;
+}
+.quiz-pinyin {
+  font-size: 14px; color: var(--warning); margin-bottom: 12px;
+  font-style: italic;
+}
+.quiz-sentence {
+  font-size: 20px; line-height: 2; margin-bottom: 20px;
+  word-break: break-all;
+}
+.quiz-sentence .blank {
+  display: inline-block;
+  min-width: 60px;
+  border-bottom: 2px solid var(--accent);
+  margin: 0 2px;
+  text-align: center;
+  color: var(--accent);
+  font-weight: 600;
+}
+.quiz-sentence .blank.correct { border-color: var(--success); color: var(--success); }
+.quiz-sentence .blank.wrong { border-color: var(--danger); color: var(--danger); }
+
+.input-area {
+  display: flex; gap: 8px; margin-bottom: 12px;
+}
+.input-area input {
+  flex: 1; padding: 12px; font-size: 18px;
+  background: var(--card2); border: 2px solid #333;
+  border-radius: 12px; color: var(--text);
+  outline: none;
+}
+.input-area input:focus { border-color: var(--accent); }
+.input-area input::placeholder { color: #555; }
+
+.btn {
+  padding: 12px 24px; border: none; border-radius: 12px;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: all .15s;
+}
+.btn:active { transform: scale(0.96); }
+.btn-primary { background: var(--accent); color: white; }
+.btn-secondary { background: var(--accent2); color: white; }
+.btn-outline { background: transparent; border: 2px solid #444; color: var(--text); }
+.btn-success { background: #22c55e; color: white; }
+.btn-block { display: block; width: 100%; }
+
+.btn-group { display: flex; gap: 8px; margin-top: 12px; }
+.btn-group .btn { flex: 1; }
+
+/* Flashcard */
+.flashcard {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 32px 20px;
+  text-align: center;
+  min-height: 260px;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  cursor: pointer;
+  transition: transform .3s;
+  perspective: 1000px;
+}
+.flashcard .chinese { font-size: 36px; font-weight: 700; margin-bottom: 8px; }
+.flashcard .pinyin { font-size: 16px; color: var(--warning); margin-bottom: 12px; }
+.flashcard .pos { font-size: 12px; color: var(--text2); margin-bottom: 8px; }
+.flashcard .meaning { font-size: 18px; margin-bottom: 16px; }
+.flashcard .example { font-size: 15px; color: var(--text2); line-height: 1.6; }
+.flashcard .example-ko { font-size: 13px; color: #777; margin-top: 4px; }
+.flashcard .hidden { visibility: hidden; }
+.flashcard .revealed { visibility: visible; }
+
+/* Audio player */
+.audio-player {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px; margin-bottom: 12px;
+}
+.audio-controls {
+  display: flex; align-items: center; gap: 12px;
+}
+.audio-controls button {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: none; background: var(--accent); color: white;
+  font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.audio-info { flex: 1; }
+.audio-info .track-name { font-size: 14px; font-weight: 600; }
+.audio-info .track-detail { font-size: 12px; color: var(--text2); }
+
+/* Stats */
+.stat-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px; text-align: center;
+}
+.stat-value { font-size: 28px; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+/* Filter chips */
+.chips {
+  display: flex; gap: 8px; margin-bottom: 16px;
+  overflow-x: auto; padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  padding: 6px 14px; border-radius: 20px;
+  font-size: 13px; white-space: nowrap; cursor: pointer;
+  background: var(--card); border: 1px solid #333;
+  color: var(--text2); transition: all .2s;
+}
+.chip.active {
+  background: var(--accent); border-color: var(--accent);
+  color: white;
+}
+
+/* Review mode selector */
+.mode-selector {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin-bottom: 20px;
+}
+.mode-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px; text-align: center;
+  cursor: pointer; border: 2px solid transparent;
+  transition: all .2s;
+}
+.mode-card:active { transform: scale(0.97); }
+.mode-card.active { border-color: var(--accent); }
+.mode-card .mode-icon { font-size: 28px; margin-bottom: 8px; }
+.mode-card .mode-title { font-size: 14px; font-weight: 600; }
+.mode-card .mode-desc { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+/* Result screen */
+.result-screen {
+  text-align: center; padding: 40px 20px;
+}
+.result-score {
+  font-size: 64px; font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), #ff6b9d);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.result-detail { font-size: 16px; color: var(--text2); margin: 12px 0 24px; }
+
+/* 돌아가기 button */
+.back-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: var(--text2); font-size: 14px;
+  cursor: pointer; margin-bottom: 12px;
+  background: none; border: none; padding: 8px 0;
+}
+
+/* Scroll list */
+.word-list { list-style: none; }
+.word-list li {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: var(--card);
+  border-radius: 12px; margin-bottom: 8px;
+}
+.word-list .word-chinese { font-size: 18px; font-weight: 600; }
+.word-list .word-pinyin { font-size: 12px; color: var(--warning); }
+.word-list .word-meaning { font-size: 13px; color: var(--text2); text-align: right; }
+
+/* SRS indicator */
+.srs-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block; margin-right: 6px;
+}
+.srs-new { background: #60a5fa; }
+.srs-learning { background: var(--warning); }
+.srs-review { background: var(--success); }
+.srs-hard { background: var(--danger); }
+
+/* Typing practice */
+.typing-area {
+  background: var(--card); border-radius: var(--radius);
+  padding: 20px; margin-bottom: 16px;
+}
+.typing-prompt {
+  font-size: 18px; line-height: 1.8; margin-bottom: 16px;
+}
+.typing-prompt ruby rt { font-size: 11px; color: var(--warning); }
+.typing-input {
+  width: 100%; padding: 14px; font-size: 20px;
+  background: var(--bg); border: 2px solid #333;
+  border-radius: 12px; color: var(--text);
+  outline: none; resize: none;
+  min-height: 80px;
+}
+.typing-input:focus { border-color: var(--accent); }
+
+/* Vocab page */
+.vocab-stat-row {
+  display: flex; gap: 8px; margin-bottom: 16px;
+}
+.vocab-stat-item {
+  flex: 1; background: var(--card); border-radius: 12px;
+  padding: 10px; text-align: center;
+}
+.vocab-stat-item .val { font-size: 20px; font-weight: 700; }
+.vocab-stat-item .lbl { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.vocab-stat-item .val.c-green { color: var(--success); }
+.vocab-stat-item .val.c-yellow { color: var(--warning); }
+.vocab-stat-item .val.c-red { color: var(--accent); }
+
+/* Sentence quiz */
+.sq-sentence {
+  font-size: 22px; line-height: 1.8; text-align: center;
+  padding: 20px 16px; margin-bottom: 16px;
+  background: var(--card); border-radius: var(--radius);
+  word-break: break-all;
+}
+.sq-sentence .sq-blank {
+  display: inline-block; min-width: 44px;
+  border-bottom: 3px solid var(--accent);
+  margin: 0 2px; color: transparent;
+}
+.sq-sentence .sq-blank.filled {
+  color: var(--success); border-color: var(--success);
+}
+.sq-sentence .sq-blank.wrong-fill {
+  color: var(--danger); border-color: var(--danger);
+}
+.sq-ko {
+  font-size: 14px; color: var(--text2); text-align: center;
+  margin-bottom: 20px; line-height: 1.5;
+}
+.sq-timer {
+  font-size: 12px; color: var(--text2); text-align: center; margin-bottom: 8px;
+}
+
+/* Multiple choice grid */
+.mc-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-bottom: 16px;
+}
+.mc-option {
+  padding: 16px 12px; background: var(--card);
+  border: 2px solid #333; border-radius: 14px;
+  font-size: 20px; font-weight: 600; color: var(--text);
+  text-align: center; cursor: pointer; transition: all .15s;
+}
+.mc-option:active { transform: scale(0.96); }
+.mc-option.correct { border-color: var(--success); background: #22c55e22; }
+.mc-option.wrong { border-color: var(--danger); background: #ef444422; }
+.mc-option.dim { opacity: 0.3; pointer-events: none; }
+.mc-option .mc-pinyin { font-size: 11px; color: var(--warning); font-weight: 400; margin-top: 4px; }
+.mc-option .mc-meaning { font-size: 12px; color: var(--text2); font-weight: 400; margin-top: 4px; display: none; }
+.mc-option.reveal .mc-meaning { display: block; }
+.mc-option.reveal .mc-pinyin { display: block; }
+
+/* Toast */
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--card); padding: 12px 24px; border-radius: 12px;
+  font-size: 14px; z-index: 200; box-shadow: 0 4px 20px rgba(0,0,0,.5);
+  opacity: 0; transition: opacity .3s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* Empty state */
+.empty-state {
+  text-align: center; padding: 40px 20px; color: var(--text2);
+}
+.empty-state svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: .4; }
+
+/* Settings */
+.setting-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 16px; background: var(--card);
+  border-radius: 12px; margin-bottom: 8px;
+}
+.setting-label { font-size: 14px; }
+.setting-value { font-size: 14px; color: var(--accent); }
+
+/* Toggle */
+.toggle {
+  width: 48px; height: 26px; border-radius: 13px;
+  background: #333; position: relative; cursor: pointer;
+  transition: background .2s;
+}
+.toggle.on { background: var(--accent); }
+.toggle::after {
+  content: ''; position: absolute;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: white; top: 2px; left: 2px;
+  transition: left .2s;
+}
+.toggle.on::after { left: 24px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="toast" class="toast"></div>
+
+  <!-- Home Page -->
+  <div id="page-home" class="page active">
+    <div class="page-header">
+      HSK 4급 복습
+      <small>IBT 시험 대비 - 출퇴근길 복습용</small>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-streak">0</div>
+        <div class="stat-label">연속 학습</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-today">0</div>
+        <div class="stat-label">오늘 복습</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-mastered">0</div>
+        <div class="stat-label">완전 암기</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-review">0</div>
+        <div class="stat-label">복습 필요</div>
+      </div>
+    </div>
+
+    <div class="card" onclick="showPage('vocab')" style="background: linear-gradient(135deg, #0f3460, #533483);">
+      <div class="card-title" style="font-size: 18px;">단어 학습</div>
+      <div class="card-sub" style="color: #ddd;" id="home-vocab-desc">14일 플랜 - 예문 빈칸 채우기</div>
+    </div>
+    <div class="card" onclick="showPage('audio')">
+      <div class="card-title">듣기 연습</div>
+      <div class="card-sub">급수별 단어장 MP3 듣기</div>
+    </div>
+    <div class="card" onclick="showPage('typing')">
+      <div class="card-title">타이핑 연습</div>
+      <div class="card-sub">IBT 대비 중국어 입력 · 어순 배열</div>
+    </div>
+    <div class="card" onclick="showPage('test')">
+      <div class="card-title">문장 테스트</div>
+      <div class="card-sub">38세트 - 빈칸에 중국어 채우기</div>
+    </div>
+    <div class="card" onclick="showPage('notes')">
+      <div class="card-title">비밀노트</div>
+      <div class="card-sub">22개 카테고리 - 핵심 단어 220개</div>
+    </div>
+    <div class="card" onclick="showPage('wrong')" style="border:1px solid var(--danger)33;">
+      <div class="card-title" style="color:var(--danger);">틀린 문제 모아보기</div>
+      <div class="card-sub" id="home-wrong-count">0개</div>
+    </div>
+  </div>
+
+  <!-- Test Page -->
+  <div id="page-test" class="page">
+    <button class="back-btn" onclick="showPage('home')">&lt; 뒤로</button>
+    <div class="page-header">문장 테스트</div>
+    <div class="setting-row" style="margin-bottom:12px;">
+      <div class="setting-label">병음 힌트</div>
+      <div class="toggle" id="pinyin-toggle" onclick="togglePinyin()"></div>
+    </div>
+    <div class="chips" id="test-level-chips">
+      <div class="chip active" data-level="all" onclick="filterTestSets('all')">All</div>
+      <div class="chip" data-level="1-2" onclick="filterTestSets('1-2')">1-2</div>
+      <div class="chip" data-level="3" onclick="filterTestSets('3')">3</div>
+      <div class="chip" data-level="4" onclick="filterTestSets('4')">4</div>
+    </div>
+    <div id="test-list"></div>
+  </div>
+
+  <!-- Quiz Page -->
+  <div id="page-quiz" class="page">
+    <button class="back-btn" id="quiz-back-btn">&lt; 뒤로</button>
+    <div class="quiz-progress">
+      <span id="quiz-num">1/10</span>
+      <div class="progress-bar"><div class="progress-fill" id="quiz-progress"></div></div>
+      <span id="quiz-score">0</span>
+    </div>
+    <div id="quiz-content"></div>
+  </div>
+
+  <!-- Notes Page -->
+  <div id="page-notes" class="page">
+    <button class="back-btn" onclick="showPage('home')">&lt; 뒤로</button>
+    <div class="page-header">비밀노트</div>
+    <div class="mode-selector">
+      <div class="mode-card active" onclick="setNotesMode('flash')" id="mode-flash">
+        <div class="mode-icon">&#x1F0CF;</div>
+        <div class="mode-title">플래시카드</div>
+        <div class="mode-desc">탭하여 뒤집기</div>
+      </div>
+      <div class="mode-card" onclick="setNotesMode('quiz')" id="mode-quiz">
+        <div class="mode-icon">&#x270D;</div>
+        <div class="mode-title">타이핑 퀴즈</div>
+        <div class="mode-desc">중국어 직접 입력</div>
+      </div>
+    </div>
+    <div id="notes-categories"></div>
+  </div>
+
+  <!-- Flashcard Page -->
+  <div id="page-flashcard" class="page">
+    <button class="back-btn" onclick="showPage('notes')">&lt; 뒤로</button>
+    <div class="quiz-progress">
+      <span id="fc-num">1/10</span>
+      <div class="progress-bar"><div class="progress-fill" id="fc-progress"></div></div>
+    </div>
+    <div id="fc-content"></div>
+  </div>
+
+  <!-- Word Quiz Page -->
+  <div id="page-wordquiz" class="page">
+    <button class="back-btn" onclick="showPage('notes')">&lt; 뒤로</button>
+    <div class="quiz-progress">
+      <span id="wq-num">1/10</span>
+      <div class="progress-bar"><div class="progress-fill" id="wq-progress"></div></div>
+      <span id="wq-score">0</span>
+    </div>
+    <div id="wq-content"></div>
+  </div>
+
+  <!-- Audio Page -->
+  <div id="page-audio" class="page">
+    <button class="back-btn" onclick="showPage('home')">&lt; 뒤로</button>
+    <div class="page-header">듣기 연습</div>
+    <div class="chips" id="audio-level-chips">
+      <div class="chip active" data-level="1-2" onclick="filterAudio('1-2')">1-2</div>
+      <div class="chip" data-level="3" onclick="filterAudio('3')">3</div>
+      <div class="chip" data-level="4" onclick="filterAudio('4')">4</div>
+    </div>
+    <div id="audio-list"></div>
+    <div class="audio-player" id="audio-player" style="display:none; position:fixed; bottom:72px; left:8px; right:8px; max-width:464px; margin:0 auto;">
+      <div class="audio-controls">
+        <button onclick="playPrev()" style="width:36px;height:36px;font-size:14px;background:var(--accent2);">&#9664;&#9664;</button>
+        <button onclick="togglePlay()" id="play-btn">&#9654;</button>
+        <button onclick="playNext()" style="width:36px;height:36px;font-size:14px;background:var(--accent2);">&#9654;&#9654;</button>
+        <div class="audio-info">
+          <div class="track-name" id="track-name">-</div>
+          <div class="track-detail" id="track-detail">-</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; margin-top:10px;">
+        <span id="audio-current" style="font-size:11px; color:var(--text2); min-width:36px;">0:00</span>
+        <input type="range" id="audio-seek" min="0" max="100" value="0" style="flex:1; height:4px; accent-color:var(--accent); cursor:pointer;">
+        <span id="audio-duration" style="font-size:11px; color:var(--text2); min-width:36px;">0:00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Typing Page -->
+  <div id="page-typing" class="page">
+    <button class="back-btn" onclick="showPage('home')">&lt; 뒤로</button>
+    <div class="page-header">
+      타이핑 연습
+      <small>IBT 시험 형식 중국어 입력</small>
+    </div>
+    <div class="mode-selector">
+      <div class="mode-card active" onclick="setTypingMode('type')" id="tmode-type">
+        <div class="mode-icon">&#x2328;</div>
+        <div class="mode-title">직접 입력</div>
+        <div class="mode-desc">문장 전체 타이핑</div>
+      </div>
+      <div class="mode-card" onclick="setTypingMode('order')" id="tmode-order">
+        <div class="mode-icon">&#x1F500;</div>
+        <div class="mode-title">어순 맞추기</div>
+        <div class="mode-desc">단어를 순서대로 배열</div>
+      </div>
+    </div>
+    <div id="typing-type-area">
+      <div class="typing-area">
+        <div class="typing-prompt" id="typing-prompt"></div>
+        <textarea class="typing-input" id="typing-input" placeholder="여기에 중국어 문장을 입력하세요..." lang="zh-CN" inputmode="text"></textarea>
+      </div>
+      <div id="typing-btns">
+        <button class="btn btn-primary btn-block" onclick="showTypingAnswer()">정답 확인</button>
+      </div>
+      <div id="typing-answer" style="display:none; margin-top:16px; padding:16px; background:var(--card); border-radius:12px;">
+        <div style="font-size:12px; color:var(--text2); margin-bottom:8px;">정답:</div>
+        <div id="typing-answer-text" style="font-size:20px; line-height:1.6;"></div>
+        <button class="btn btn-primary btn-block" style="margin-top:12px;" onclick="nextTypingQuestion()">다음</button>
+      </div>
+    </div>
+    <div id="typing-order-area" style="display:none;">
+      <div class="typing-area">
+        <div id="order-prompt" style="font-size:16px; margin-bottom:12px;"></div>
+        <div id="order-selected" style="min-height:50px; padding:12px; background:var(--bg); border-radius:12px; border:2px solid #333; margin-bottom:12px; font-size:20px; line-height:2; word-spacing:4px;"></div>
+        <div id="order-choices" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-outline" onclick="resetOrder()">초기화</button>
+        <button class="btn btn-primary" onclick="checkOrder()">확인</button>
+      </div>
+      <div id="order-feedback" style="display:none; margin-top:12px; padding:16px; background:var(--card); border-radius:12px;"></div>
+    </div>
+  </div>
+
+  <!-- Daily Review Page -->
+  <div id="page-daily" class="page">
+    <button class="back-btn" onclick="showPage('home')">&lt; 뒤로</button>
+    <div class="page-header">오늘의 복습</div>
+    <div id="daily-content"></div>
+  </div>
+
+  <!-- Vocab Page -->
+  <div id="page-vocab" class="page">
+    <div class="page-header">
+      단어 학습
+      <small id="plan-header-sub">14일 완성 플랜</small>
+    </div>
+
+    <!-- Today's plan card -->
+    <div id="plan-today" style="background: linear-gradient(135deg, #0f3460, #533483); border-radius:var(--radius); padding:16px; margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:11px; color:#aaa;" id="plan-day-label">Day 1 / 14</div>
+          <div style="font-size:18px; font-weight:700;" id="plan-level-label">1~2급 학습</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:24px; font-weight:700;" id="plan-today-remaining">0</div>
+          <div style="font-size:11px; color:#aaa;">오늘 남은 단어</div>
+        </div>
+      </div>
+      <div style="height:6px; background:rgba(255,255,255,0.15); border-radius:3px; margin-top:12px; overflow:hidden;">
+        <div id="plan-today-bar" style="height:100%; background:var(--success); width:0%; transition:width .5s;"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:#aaa; margin-top:4px;">
+        <span id="plan-today-done">0개 완료</span>
+        <span id="plan-today-total">목표 0개</span>
+      </div>
+    </div>
+
+    <!-- 5 sessions -->
+    <div style="font-size:13px; color:var(--text2); margin-bottom:8px;">오늘의 세션</div>
+    <div id="plan-sessions"></div>
+
+    <!-- Overall progress -->
+    <div style="font-size:13px; color:var(--text2); margin-top:16px; margin-bottom:8px;">전체 진도</div>
+    <div class="vocab-stat-row">
+      <div class="vocab-stat-item"><div class="val c-green" id="v-mastered2">0</div><div class="lbl">암기</div></div>
+      <div class="vocab-stat-item"><div class="val c-yellow" id="v-learning">0</div><div class="lbl">학습중</div></div>
+      <div class="vocab-stat-item"><div class="val c-red" id="v-due">0</div><div class="lbl">복습</div></div>
+    </div>
+    <div style="height:8px; background:#333; border-radius:4px; overflow:hidden; margin-bottom:8px;">
+      <div id="vocab-progress-fill" style="height:100%; background: linear-gradient(90deg, var(--success), var(--warning)); width:0%; transition: width .5s;"></div>
+    </div>
+    <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text2); margin-bottom:16px;">
+      <span id="vocab-progress-text">0 / 1200</span>
+      <span id="vocab-avg-speed">평균 응답: -</span>
+    </div>
+  </div>
+
+  <!-- Wrong Items Page -->
+  <div id="page-wrong" class="page">
+    <button class="back-btn" onclick="showPage('home')">&lt; 뒤로</button>
+    <div class="page-header">
+      틀린 문제 모아보기
+      <small id="wrong-total-count">0개</small>
+    </div>
+    <div class="chips" id="wrong-type-chips">
+      <div class="chip active" data-type="all" onclick="filterWrong('all')">전체</div>
+      <div class="chip" data-type="vocab" onclick="filterWrong('vocab')">단어</div>
+      <div class="chip" data-type="sentence" onclick="filterWrong('sentence')">문장</div>
+      <div class="chip" data-type="order" onclick="filterWrong('order')">어순</div>
+      <div class="chip" data-type="notes" onclick="filterWrong('notes')">노트</div>
+    </div>
+    <div class="btn-group" style="margin-bottom:12px;">
+      <button class="btn btn-primary" onclick="startWrongReview()" style="flex:1;">틀린 문제 복습하기</button>
+      <button class="btn btn-outline" onclick="clearResolvedWrong()" style="flex:0 0 auto;font-size:12px;">맞춘 것 정리</button>
+    </div>
+    <div id="wrong-list" style="max-height:55vh; overflow-y:auto;"></div>
+  </div>
+
+  <!-- Vocab Session Page (말해보카 스타일) -->
+  <div id="page-vocabsession" class="page">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <button class="back-btn" onclick="confirmQuitVocab()" style="margin:0;">&lt; 그만하기</button>
+      <span id="vs-counter" style="font-size:13px; color:var(--text2);">1/20</span>
+    </div>
+    <div class="progress-bar" style="margin-bottom:16px;"><div class="progress-fill" id="vs-progress"></div></div>
+    <div id="vs-content"></div>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<nav class="nav">
+  <button class="nav-item active" onclick="showPage('home')" data-page="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+    홈
+  </button>
+  <button class="nav-item" onclick="showPage('audio')" data-page="audio">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    듣기
+  </button>
+  <button class="nav-item" onclick="showPage('vocab')" data-page="vocab">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M8 7h8M8 11h6"/></svg>
+    단어
+  </button>
+  <button class="nav-item" onclick="showPage('notes')" data-page="notes">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+    노트
+  </button>
+  <button class="nav-item" onclick="showPage('test')" data-page="test">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+    테스트
+  </button>
+</nav>
+
+<script>
+// =================== DATA ===================
+let testSets = [];
+let secretNotes = [];
+let srsData = {};
+let stats = { streak: 0, lastDate: '', todayCount: 0, totalReviewed: 0 };
+let showPinyin = JSON.parse(localStorage.getItem('hsk4_showPinyin') ?? 'false');
+
+function togglePinyin() {
+  showPinyin = !showPinyin;
+  localStorage.setItem('hsk4_showPinyin', JSON.stringify(showPinyin));
+  document.getElementById('pinyin-toggle').classList.toggle('on', showPinyin);
+}
+
+// Pinyin conversion helper
+function toPinyin(chinese) {
+  try {
+    if (window.pinyinPro) return pinyinPro.pinyin(chinese, { toneType: 'symbol', type: 'string' });
+  } catch(e) {}
+  return '';
+}
+
+// Punctuation normalization: treat Chinese and English punctuation as equivalent
+function normalizePunct(str) {
+  return str
+    .replace(/，/g, ',')
+    .replace(/。/g, '.')
+    .replace(/？/g, '?')
+    .replace(/！/g, '!')
+    .replace(/：/g, ':')
+    .replace(/；/g, ';')
+    .replace(/\u201c/g, '"')  // "
+    .replace(/\u201d/g, '"')  // "
+    .replace(/\u2018/g, "'")  // '
+    .replace(/\u2019/g, "'")  // '
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Init pinyin toggle on load
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('pinyin-toggle').classList.toggle('on', showPinyin);
+});
+
+// Load data
+async function loadData() {
+  try {
+    const [tsRes, snRes] = await Promise.all([
+      fetch('data/testSets.json'),
+      fetch('data/secretNotes.json')
+    ]);
+    testSets = await tsRes.json();
+    secretNotes = await snRes.json();
+  } catch(e) {
+    console.error('Failed to load data:', e);
+  }
+
+  // Load saved progress
+  const saved = localStorage.getItem('hsk4_srs');
+  if (saved) srsData = JSON.parse(saved);
+
+  const savedStats = localStorage.getItem('hsk4_stats');
+  if (savedStats) stats = JSON.parse(savedStats);
+
+  // 확인 streak
+  const today = new Date().toDateString();
+  if (stats.lastDate !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (stats.lastDate !== yesterday) stats.streak = 0;
+    stats.todayCount = 0;
+  }
+
+  updateHomeStats();
+  renderTestList();
+  renderNoteCategories();
+  renderAudioList('1-2');
+  loadTypingQuestion();
+}
+
+function saveSRS() { localStorage.setItem('hsk4_srs', JSON.stringify(srsData)); }
+function saveStats() { localStorage.setItem('hsk4_stats', JSON.stringify(stats)); }
+
+function recordReview() {
+  const today = new Date().toDateString();
+  if (stats.lastDate !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (stats.lastDate === yesterday) stats.streak++;
+    else stats.streak = 1;
+  }
+  stats.lastDate = today;
+  stats.todayCount++;
+  stats.totalReviewed++;
+  saveStats();
+  updateHomeStats();
+}
+
+// SRS - Spaced Repetition
+function getSRS(key) {
+  if (!srsData[key]) {
+    srsData[key] = { level: 0, nextReview: 0, correct: 0, wrong: 0 };
+  }
+  return srsData[key];
+}
+
+function updateSRS(key, correct) {
+  const s = getSRS(key);
+  const intervals = [0, 1, 3, 7, 14, 30, 60]; // days
+  if (correct) {
+    s.level = Math.min(s.level + 1, intervals.length - 1);
+    s.correct++;
+  } else {
+    s.level = Math.max(0, s.level - 2);
+    s.wrong++;
+  }
+  s.nextReview = Date.now() + intervals[s.level] * 86400000;
+  saveSRS();
+}
+
+function getDueWords() {
+  const due = [];
+  for (const cat of secretNotes) {
+    for (const w of cat.words) {
+      const key = `word_${w.chinese}`;
+      const s = getSRS(key);
+      if (s.nextReview <= Date.now()) due.push({ ...w, srsKey: key, category: cat.title });
+    }
+  }
+  return due;
+}
+
+function getMasteredCount() {
+  let count = 0;
+  for (const key in srsData) {
+    if (srsData[key].level >= 4) count++;
+  }
+  return count;
+}
+
+function updateHomeStats() {
+  document.getElementById('stat-streak').textContent = stats.streak;
+  document.getElementById('stat-today').textContent = stats.todayCount;
+  document.getElementById('stat-mastered').textContent = getMasteredCount();
+  const due = getDueWords().length;
+  document.getElementById('stat-review').textContent = due;
+  const dailyDesc = document.getElementById('daily-review-desc');
+  if (dailyDesc) dailyDesc.textContent =
+    due > 0 ? `${due}개 단어 복습 필요` : '모두 완료! 추가 연습하기';
+}
+
+// =================== NAVIGATION ===================
+function showPage(pageId) {
+  // If leaving a quiz/session, the confirm is handled by the back button already
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + pageId);
+  if (!el) { document.getElementById('page-home').classList.add('active'); pageId = 'home'; }
+  else el.classList.add('active');
+  // Map sub-pages to parent nav items
+  const navMap = { vocabsession: 'vocab', quiz: 'test', flashcard: 'notes', wordquiz: 'notes', daily: 'home', typing: 'home', wrong: 'home' };
+  const navPage = navMap[pageId] || pageId;
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.page === navPage);
+  });
+  if (pageId === 'home') { updateHomeStats(); updateWrongCount(); }
+  if (pageId === 'wrong') renderWrongList();
+  if (pageId === 'vocab') updateVocabPage();
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// =================== TEST SETS ===================
+function renderTestList(filter) {
+  const container = document.getElementById('test-list');
+  let filtered = testSets;
+  if (filter && filter !== 'all') {
+    const levelStr = filter + '급';
+    filtered = testSets.filter(s => s.level.includes(filter));
+  }
+  container.innerHTML = filtered.map(s => {
+    const badgeClass = s.level.includes('1-2') ? 'badge-12' : s.level.includes('3') ? 'badge-3' : 'badge-4';
+    const completed = getSetCompletion(s.set);
+    return `<div class="card" data-set="${s.set}">
+      <div class="card-title">
+        <span class="badge ${badgeClass}">${s.level}</span>
+        Set ${s.set}
+      </div>
+      <div class="card-sub">${s.questions.length} questions ${completed > 0 ? `- Best: ${completed}/10` : ''}</div>
+    </div>`;
+  }).join('');
+  container.querySelectorAll('.card[data-set]').forEach(card => {
+    card.addEventListener('click', () => startQuiz(parseInt(card.dataset.set)));
+  });
+}
+
+function filterTestSets(level) {
+  document.querySelectorAll('#test-level-chips .chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.level === level);
+  });
+  renderTestList(level === 'all' ? null : level);
+}
+
+function getSetCompletion(setNum) {
+  const key = `set_${setNum}_best`;
+  return parseInt(localStorage.getItem(key) || '0');
+}
+
+// =================== SENTENCE QUIZ ===================
+let currentQuiz = null;
+
+function startQuiz(setNum) {
+  const set = testSets.find(s => s.set === setNum);
+  if (!set) return;
+  currentQuiz = {
+    set: set,
+    current: 0,
+    score: 0,
+    answers: []
+  };
+  document.getElementById('quiz-back-btn').onclick = () => {
+    if (confirm('퀴즈를 종료할까요?')) showPage('test');
+  };
+  showPage('quiz');
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  const q = currentQuiz.set.questions[currentQuiz.current];
+  if (!q) return showQuizResult();
+
+  const total = currentQuiz.set.questions.length;
+  document.getElementById('quiz-num').textContent = `${currentQuiz.current + 1}/${total}`;
+  document.getElementById('quiz-progress').style.width = `${(currentQuiz.current / total) * 100}%`;
+  document.getElementById('quiz-score').textContent = currentQuiz.score;
+
+  // Parse blanks from pinyin
+  const blanks = q.pinyins.map((p, i) => `<span class="blank" id="blank-${i}" data-pinyin="${p}">${p}</span>`);
+
+  // Reconstruct sentence with blanks
+  let sentence = q.chineseTemplate;
+  // Replace tab-separated sections
+  const parts = sentence.split(/\t+/);
+  let html = '';
+  let blankIdx = 0;
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i].trim();
+    if (!part) continue;
+    // 확인 if this part position should have a blank before it
+    html += part;
+    if (blankIdx < blanks.length && i < parts.length - 1) {
+      html += blanks[blankIdx++];
+    }
+  }
+
+  // If we didn't use all blanks, show them at end
+  while (blankIdx < blanks.length) {
+    html += blanks[blankIdx++];
+  }
+
+  const container = document.getElementById('quiz-content');
+  container.innerHTML = `
+    <div class="quiz-korean">${q.korean}</div>
+    ${showPinyin ? `<div class="quiz-pinyin">${q.pinyins.join('  |  ')}</div>` : ''}
+    <div class="quiz-sentence">${q.chineseTemplate.replace(/\t+/g, ' <span class="blank">___</span> ')}</div>
+    <div style="margin-bottom:12px;">
+      ${q.pinyins.map((p, i) => `
+        <div style="margin-bottom:8px;">
+          ${showPinyin ? `<div style="font-size:12px; color:var(--warning); margin-bottom:4px;">${p}</div>` : `<div style="font-size:12px; color:#555; margin-bottom:4px;">Blank ${i+1}</div>`}
+          <input type="text" class="quiz-input" id="qi-${i}" lang="zh-CN"
+            placeholder="중국어 입력..." style="width:100%; padding:10px; font-size:18px;
+            background:var(--card2); border:2px solid #333; border-radius:10px; color:var(--text); outline:none;"
+            onfocus="this.style.borderColor='var(--accent)'"
+            onblur="this.style.borderColor='#333'">
+        </div>
+      `).join('')}
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-outline" onclick="showQuizAnswer()">정답 보기</button>
+      <button class="btn btn-primary" onclick="checkQuizAnswer()">확인</button>
+    </div>
+    <div id="quiz-feedback" style="display:none; margin-top:12px; padding:12px; border-radius:12px;"></div>
+  `;
+
+  // Focus first input
+  setTimeout(() => {
+    const first = document.getElementById('qi-0');
+    if (first) first.focus();
+  }, 100);
+
+  // Auto-advance on enter
+  const inputs = container.querySelectorAll('.quiz-input');
+  inputs.forEach((inp, i) => {
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        if (i < inputs.length - 1) {
+          inputs[i + 1].focus();
+        } else {
+          checkQuizAnswer();
+        }
+      }
+    });
+  });
+}
+
+function showQuizAnswer() {
+  const q = currentQuiz.set.questions[currentQuiz.current];
+  const feedback = document.getElementById('quiz-feedback');
+  feedback.style.display = 'block';
+  feedback.style.background = 'var(--card2)';
+  feedback.innerHTML = `<div style="font-size:13px; color:var(--text2); margin-bottom:4px;">참고 (병음):</div>
+    <div style="font-size:16px;">${q.pinyins.join(' | ')}</div>
+    <div style="font-size:13px; color:var(--text2); margin-top:8px;">문장 틀:</div>
+    <div style="font-size:16px;">${q.chineseTemplate}</div>`;
+}
+
+function checkQuizAnswer() {
+  const q = currentQuiz.set.questions[currentQuiz.current];
+  const feedback = document.getElementById('quiz-feedback');
+
+  // Self-check mode - show what they typed and let them judge
+  const answers = q.pinyins.map((p, i) => {
+    const inp = document.getElementById('qi-' + i);
+    return inp ? inp.value.trim() : '';
+  });
+
+  const hasInput = answers.some(a => a.length > 0);
+
+  feedback.style.display = 'block';
+  feedback.innerHTML = `
+    <div style="font-size:13px; color:var(--text2); margin-bottom:8px;">내 답: ${answers.join(' | ')}</div>
+    <div style="font-size:14px; margin-bottom:12px;">맞았나요?</div>
+    <div class="btn-group">
+      <button class="btn btn-outline" onclick="gradeQuiz(false)" style="border-color:var(--danger); color:var(--danger);">틀림</button>
+      <button class="btn btn-outline" onclick="gradeQuiz(true)" style="border-color:var(--success); color:var(--success);">맞음</button>
+    </div>`;
+  feedback.style.background = 'var(--card2)';
+}
+
+function gradeQuiz(correct) {
+  const q = currentQuiz.set.questions[currentQuiz.current];
+  if (correct) currentQuiz.score++;
+  else {
+    addWrongItem('sentence', { sentence: q.chineseTemplate, sentenceKo: q.korean, pinyin: q.pinyins.join(', ') });
+  }
+
+  q.pinyins.forEach(p => updateSRS(`test_${p}`, correct));
+  recordReview();
+
+  currentQuiz.current++;
+  if (currentQuiz.current >= currentQuiz.set.questions.length) {
+    showQuizResult();
+  } else {
+    renderQuizQuestion();
+  }
+}
+
+function showQuizResult() {
+  const total = currentQuiz.set.questions.length;
+  const score = currentQuiz.score;
+  const pct = Math.round((score / total) * 100);
+
+  // Save best score
+  const bestKey = `set_${currentQuiz.set.set}_best`;
+  const prev = parseInt(localStorage.getItem(bestKey) || '0');
+  if (score > prev) localStorage.setItem(bestKey, score);
+
+  const setNum = currentQuiz.set.set;
+  const quizContent = document.getElementById('quiz-content');
+  quizContent.innerHTML = `
+    <div class="result-screen">
+      <div class="result-score">${pct}%</div>
+      <div class="result-detail">${score}/${total} correct</div>
+      <div style="margin-bottom:24px; color:var(--text2);">
+        ${pct >= 80 ? '훌륭해요!' : pct >= 60 ? '잘하고 있어요!' : '더 연습해봐요!'}
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-outline" id="quiz-result-back">세트 목록</button>
+        <button class="btn btn-primary" id="quiz-result-retry">다시 풀기</button>
+      </div>
+    </div>`;
+  quizContent.querySelector('#quiz-result-back').addEventListener('click', () => showPage('test'));
+  quizContent.querySelector('#quiz-result-retry').addEventListener('click', () => startQuiz(setNum));
+}
+
+// =================== SECRET NOTES ===================
+let notesMode = 'flash';
+
+function setNotesMode(mode) {
+  notesMode = mode;
+  document.getElementById('mode-flash').classList.toggle('active', mode === 'flash');
+  document.getElementById('mode-quiz').classList.toggle('active', mode === 'quiz');
+}
+
+function renderNoteCategories() {
+  const container = document.getElementById('notes-categories');
+  container.innerHTML = secretNotes.map(cat => {
+    const reviewed = cat.words.filter(w => {
+      const s = getSRS(`word_${w.chinese}`);
+      return s.level > 0;
+    }).length;
+    return `<div class="card" data-cat-id="${cat.id}">
+      <div class="card-title" style="font-size:14px;">${cat.title}</div>
+      <div class="card-sub">${reviewed}/${cat.words.length} reviewed</div>
+    </div>`;
+  }).join('');
+  container.querySelectorAll('.card[data-cat-id]').forEach(card => {
+    card.addEventListener('click', () => startNoteReview(parseInt(card.dataset.catId)));
+  });
+}
+
+function startNoteReview(catId) {
+  const cat = secretNotes.find(c => c.id === catId);
+  if (!cat) return;
+
+  if (notesMode === 'flash') {
+    startFlashcards(cat);
+  } else {
+    startWordQuiz(cat);
+  }
+}
+
+// =================== FLASHCARDS ===================
+let fcState = null;
+
+function startFlashcards(cat) {
+  // Shuffle words with SRS priority (due words first)
+  const words = [...cat.words].sort((a, b) => {
+    const sa = getSRS(`word_${a.chinese}`);
+    const sb = getSRS(`word_${b.chinese}`);
+    return sa.nextReview - sb.nextReview;
+  });
+
+  fcState = { words, current: 0, revealed: false };
+  showPage('flashcard');
+  renderFlashcard();
+}
+
+function renderFlashcard() {
+  if (fcState.current >= fcState.words.length) {
+    showFlashcardComplete();
+    return;
+  }
+
+  const w = fcState.words[fcState.current];
+  const total = fcState.words.length;
+  document.getElementById('fc-num').textContent = `${fcState.current + 1}/${total}`;
+  document.getElementById('fc-progress').style.width = `${(fcState.current / total) * 100}%`;
+
+  const srs = getSRS(`word_${w.chinese}`);
+  const srsClass = srs.level === 0 ? 'srs-new' : srs.level < 3 ? 'srs-learning' : srs.level < 5 ? 'srs-review' : 'srs-hard';
+
+  const container = document.getElementById('fc-content');
+  container.innerHTML = `
+    <div class="flashcard" id="fc-card">
+      <div><span class="srs-dot ${srsClass}"></span><span style="font-size:11px;color:var(--text2);">Lv.${srs.level}</span></div>
+      ${isIhap(w) ? '<div style="margin-bottom:4px;"><span style="font-size:10px;padding:2px 8px;background:#f472b622;color:#f472b6;border-radius:6px;font-weight:700;">이합동사</span></div>' : ''}
+      <div class="chinese">${w.chinese}</div>
+      ${(showPinyin || fcState.revealed) ? `<div class="pinyin">${w.pinyin}</div>` : ''}
+      <div class="${fcState.revealed ? 'revealed' : 'hidden'}">
+        <div class="pos">${w.pos}</div>
+        <div class="meaning">${w.meaning}</div>
+        <div class="example">${fcState.revealed && isIhap(w) ? highlightIhap(w.example, w.chinese) : w.example}</div>
+        <div style="font-size:12px; color:var(--warning); margin-top:2px;">${toPinyin(w.example)}</div>
+        <div class="example-ko">${w.exampleKo}</div>
+        ${fcState.revealed && isIhap(w) ? buildIhapNote(w.chinese) : ''}
+      </div>
+      ${!fcState.revealed ? '<div style="font-size:13px; color:var(--text2); margin-top:16px;">탭하여 뜻 보기</div>' : ''}
+    </div>
+    ${fcState.revealed ? `
+    <div class="btn-group" style="margin-top:12px;">
+      <button class="btn btn-outline" style="border-color:var(--danger);color:var(--danger);" id="fc-rate-again">다시</button>
+      <button class="btn btn-outline" style="border-color:var(--warning);color:var(--warning);" id="fc-rate-hard">어려움</button>
+      <button class="btn btn-success" id="fc-rate-easy">쉬움</button>
+    </div>` : ''}`;
+  container.querySelector('#fc-card').addEventListener('click', flipFlashcard);
+  if (fcState.revealed) {
+    container.querySelector('#fc-rate-again').addEventListener('click', () => rateFlashcard(false));
+    container.querySelector('#fc-rate-hard').addEventListener('click', () => rateFlashcard(true));
+    container.querySelector('#fc-rate-easy').addEventListener('click', () => rateFlashcard(true));
+  }
+}
+
+function flipFlashcard() {
+  fcState.revealed = true;
+  renderFlashcard();
+}
+
+function rateFlashcard(correct) {
+  const w = fcState.words[fcState.current];
+  updateSRS(`word_${w.chinese}`, correct);
+  recordReview();
+
+  fcState.current++;
+  fcState.revealed = false;
+  renderFlashcard();
+}
+
+function showFlashcardComplete() {
+  const fcContent = document.getElementById('fc-content');
+  fcContent.innerHTML = `
+    <div class="result-screen">
+      <div class="result-score" style="font-size:48px;">완료!</div>
+      <div class="result-detail">모든 카드 복습 완료</div>
+      <button class="btn btn-primary btn-block" id="fc-complete-back">카테고리로 돌아가기</button>
+    </div>`;
+  fcContent.querySelector('#fc-complete-back').addEventListener('click', () => showPage('notes'));
+}
+
+// =================== WORD QUIZ (Type Chinese) ===================
+let wqState = null;
+
+function startWordQuiz(cat) {
+  const words = [...cat.words].sort(() => Math.random() - 0.5);
+  wqState = { words, current: 0, score: 0 };
+  showPage('wordquiz');
+  renderWordQuiz();
+}
+
+function renderWordQuiz() {
+  if (wqState.current >= wqState.words.length) {
+    showWordQuizResult();
+    return;
+  }
+
+  const w = wqState.words[wqState.current];
+  const total = wqState.words.length;
+  document.getElementById('wq-num').textContent = `${wqState.current + 1}/${total}`;
+  document.getElementById('wq-progress').style.width = `${(wqState.current / total) * 100}%`;
+  document.getElementById('wq-score').textContent = wqState.score;
+
+  // Random quiz type
+  const quizType = Math.random() < 0.5 ? 'meaning2chinese' : 'chinese2meaning';
+
+  const container = document.getElementById('wq-content');
+
+  if (quizType === 'meaning2chinese') {
+    container.innerHTML = `
+      <div class="quiz-korean" style="text-align:center;">
+        <div style="font-size:13px; color:var(--text2); margin-bottom:8px;">중국어로 쓰세요:</div>
+        <div style="font-size:18px;">${w.meaning}</div>
+        ${showPinyin ? `<div style="font-size:13px; color:var(--warning); margin-top:4px;">(${w.pinyin})</div>` : ''}
+      </div>
+      <div style="margin:16px 0;">
+        <input type="text" id="wq-input" lang="zh-CN" placeholder="중국어 입력..."
+          style="width:100%; padding:14px; font-size:22px; text-align:center;
+          background:var(--card2); border:2px solid #333; border-radius:12px;
+          color:var(--text); outline:none;"
+          onfocus="this.style.borderColor='var(--accent)'"
+          onblur="this.style.borderColor='#333'">
+      </div>
+      <button class="btn btn-primary btn-block" id="wq-check-btn">확인</button>
+      <div id="wq-feedback" style="display:none; margin-top:12px; padding:16px; border-radius:12px;"></div>`;
+    document.getElementById('wq-check-btn').addEventListener('click', () => checkWordQuiz(w.chinese));
+  } else {
+    container.innerHTML = `
+      <div style="text-align:center; padding:24px;">
+        <div style="font-size:13px; color:var(--text2); margin-bottom:12px;">무슨 뜻일까요?</div>
+        <div style="font-size:36px; font-weight:700; margin-bottom:8px;">${w.chinese}</div>
+        ${showPinyin ? `<div style="font-size:14px; color:var(--warning);">${w.pinyin}</div>` : ''}
+      </div>
+      <div style="margin:16px 0;">
+        <input type="text" id="wq-input" placeholder="한국어 뜻 입력..."
+          style="width:100%; padding:14px; font-size:18px; text-align:center;
+          background:var(--card2); border:2px solid #333; border-radius:12px;
+          color:var(--text); outline:none;"
+          onfocus="this.style.borderColor='var(--accent)'"
+          onblur="this.style.borderColor='#333'">
+      </div>
+      <button class="btn btn-primary btn-block" id="wq-check-btn">확인</button>
+      <div id="wq-feedback" style="display:none; margin-top:12px; padding:16px; border-radius:12px;"></div>`;
+    document.getElementById('wq-check-btn').addEventListener('click', () => checkWordQuizMeaning(w.meaning));
+  }
+
+  setTimeout(() => {
+    const inp = document.getElementById('wq-input');
+    if (inp) {
+      inp.focus();
+      inp.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          const btn = container.querySelector('.btn-primary');
+          if (btn) btn.click();
+        }
+      });
+    }
+  }, 100);
+}
+
+function checkWordQuiz(answer) {
+  const input = document.getElementById('wq-input').value.trim();
+  const correct = normalizePunct(input) === normalizePunct(answer);
+  showWordQuizFeedback(correct, answer);
+}
+
+function checkWordQuizMeaning(answer) {
+  const input = document.getElementById('wq-input').value.trim();
+  if (!input) { showWordQuizFeedback(false, answer); return; }
+  // Match if input is at least 2 chars and matches one of the meanings
+  const normalizedInput = normalizePunct(input);
+  const meanings = answer.split(/[,，]/).map(m => normalizePunct(m.trim()));
+  const correct = normalizedInput.length >= 2 && meanings.some(m => m === normalizedInput || (normalizedInput.length >= 2 && m.includes(normalizedInput) && normalizedInput.length >= m.length * 0.5));
+  showWordQuizFeedback(correct, answer);
+}
+
+function showWordQuizFeedback(correct, answer) {
+  const w = wqState.words[wqState.current];
+  if (correct) wqState.score++;
+  else {
+    addWrongItem('notes', { chinese: w.chinese, pinyin: w.pinyin, meaning: w.meaning });
+  }
+  updateSRS(`word_${w.chinese}`, correct);
+  recordReview();
+
+  const fb = document.getElementById('wq-feedback');
+  fb.style.display = 'block';
+  fb.style.background = correct ? '#22c55e22' : '#ef444422';
+  fb.innerHTML = `
+    <div style="color:${correct ? 'var(--success)' : 'var(--danger)'}; font-weight:600; margin-bottom:8px;">
+      ${correct ? '정답!' : '오답!'}
+    </div>
+    ${isIhap(w) ? '<div style="margin-bottom:4px;"><span style="font-size:10px;padding:2px 8px;background:#f472b622;color:#f472b6;border-radius:6px;font-weight:700;">이합동사</span></div>' : ''}
+    <div style="font-size:16px;">${w.chinese} <span style="color:var(--warning);">(${w.pinyin})</span></div>
+    <div style="font-size:14px; color:var(--text2);">${w.meaning}</div>
+    <div style="font-size:14px; margin-top:8px;">${isIhap(w) ? highlightIhap(w.example, w.chinese) : w.example}</div>
+    <div style="font-size:12px; color:var(--warning); margin-top:2px;">${toPinyin(w.example)}</div>
+    <div style="font-size:12px; color:var(--text2);">${w.exampleKo}</div>
+    ${isIhap(w) ? buildIhapNote(w.chinese) : ''}
+    <button class="btn btn-outline btn-block" style="margin-top:12px;" id="wq-next-btn">다음</button>`;
+  document.getElementById('wq-next-btn').addEventListener('click', () => { wqState.current++; renderWordQuiz(); });
+}
+
+function showWordQuizResult() {
+  const total = wqState.words.length;
+  const score = wqState.score;
+  const pct = Math.round((score / total) * 100);
+  const wqContent = document.getElementById('wq-content');
+  wqContent.innerHTML = `
+    <div class="result-screen">
+      <div class="result-score">${pct}%</div>
+      <div class="result-detail">${score}/${total} correct</div>
+      <button class="btn btn-primary btn-block" id="wq-result-back">돌아가기</button>
+    </div>`;
+  wqContent.querySelector('#wq-result-back').addEventListener('click', () => showPage('notes'));
+}
+
+// =================== AUDIO ===================
+let audioState = { level: '1-2', tracks: [], currentTrack: -1 };
+let audioEl = null;
+
+function getAudioPath(level, trackNum) {
+  const folderMap = { '1-2': 'level-12', '3': 'level-3', '4': 'level-4' };
+  const prefix = level === '1-2' ? '1,2' : level;
+  const num = String(trackNum).padStart(2, '0');
+  return `audio/${folderMap[level]}/Track ${prefix}-${num}.mp3`;
+}
+
+function filterAudio(level) {
+  document.querySelectorAll('#audio-level-chips .chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.level === level);
+  });
+  renderAudioList(level);
+}
+
+function renderAudioList(level) {
+  audioState.level = level;
+  const counts = { '1-2': 19, '3': 22, '4': 42 };
+  const count = counts[level] || 0;
+  audioState.tracks = Array.from({ length: count }, (_, i) => i + 1);
+
+  const container = document.getElementById('audio-list');
+  container.innerHTML = audioState.tracks.map(t => {
+    const prefix = level === '1-2' ? '1,2' : level;
+    return `<div class="card" data-audio-level="${level}" data-audio-track="${t}" style="padding:12px 16px;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--accent2);display:flex;align-items:center;justify-content:center;">&#9654;</div>
+        <div>
+          <div class="card-title" style="font-size:14px;">Track ${prefix}-${String(t).padStart(2, '0')}</div>
+          <div class="card-sub">Level ${level}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  container.querySelectorAll('.card[data-audio-track]').forEach(card => {
+    card.addEventListener('click', () => playTrack(card.dataset.audioLevel, parseInt(card.dataset.audioTrack)));
+  });
+}
+
+function formatTime(sec) {
+  if (!sec || isNaN(sec)) return '0:00';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+function playTrack(level, trackNum) {
+  if (!audioEl) {
+    audioEl = new Audio();
+    // Seek bar: update as audio plays
+    audioEl.addEventListener('timeupdate', () => {
+      if (!audioEl.duration) return;
+      const pct = (audioEl.currentTime / audioEl.duration) * 100;
+      const seekBar = document.getElementById('audio-seek');
+      if (seekBar && !seekBar._dragging) seekBar.value = pct;
+      const cur = document.getElementById('audio-current');
+      if (cur) cur.textContent = formatTime(audioEl.currentTime);
+    });
+    audioEl.addEventListener('loadedmetadata', () => {
+      const dur = document.getElementById('audio-duration');
+      if (dur) dur.textContent = formatTime(audioEl.duration);
+      const seekBar = document.getElementById('audio-seek');
+      if (seekBar) seekBar.value = 0;
+      const cur = document.getElementById('audio-current');
+      if (cur) cur.textContent = '0:00';
+    });
+    // Seek bar: user drags
+    const seekBar = document.getElementById('audio-seek');
+    if (seekBar) {
+      seekBar.addEventListener('input', () => {
+        seekBar._dragging = true;
+        if (audioEl.duration) {
+          audioEl.currentTime = (seekBar.value / 100) * audioEl.duration;
+        }
+      });
+      seekBar.addEventListener('change', () => { seekBar._dragging = false; });
+    }
+  }
+
+  const path = getAudioPath(level, trackNum);
+  audioEl.src = path;
+  audioEl.play().catch(e => toast('음성 파일을 찾을 수 없습니다'));
+
+  audioState.currentTrack = trackNum;
+  const prefix = level === '1-2' ? '1,2' : level;
+  document.getElementById('track-name').textContent = `Track ${prefix}-${String(trackNum).padStart(2, '0')}`;
+  document.getElementById('track-detail').textContent = `Level ${level}`;
+  document.getElementById('audio-player').style.display = 'block';
+  document.getElementById('play-btn').innerHTML = '&#9646;&#9646;';
+  document.getElementById('audio-current').textContent = '0:00';
+  document.getElementById('audio-duration').textContent = '0:00';
+
+  audioEl.onended = () => {
+    document.getElementById('play-btn').innerHTML = '&#9654;';
+  };
+}
+
+function togglePlay() {
+  if (!audioEl) return;
+  if (audioEl.paused) {
+    audioEl.play();
+    document.getElementById('play-btn').innerHTML = '&#9646;&#9646;';
+  } else {
+    audioEl.pause();
+    document.getElementById('play-btn').innerHTML = '&#9654;';
+  }
+}
+
+function playNext() {
+  const next = audioState.currentTrack + 1;
+  if (next <= audioState.tracks.length) {
+    playTrack(audioState.level, next);
+  }
+}
+
+function playPrev() {
+  const prev = audioState.currentTrack - 1;
+  if (prev >= 1) {
+    playTrack(audioState.level, prev);
+  }
+}
+
+// =================== TYPING PRACTICE ===================
+let typingWords = [];
+let currentTypingIdx = 0;
+
+function loadTypingQuestion() {
+  if (typingWords.length === 0) {
+    // Gather all example sentences from secret notes
+    typingWords = [];
+    for (const cat of secretNotes) {
+      for (const w of cat.words) {
+        typingWords.push({
+          chinese: w.example,
+          korean: w.exampleKo,
+          word: w.chinese,
+          pinyin: w.pinyin
+        });
+      }
+    }
+    // Shuffle
+    typingWords.sort(() => Math.random() - 0.5);
+  }
+  renderTypingQuestion();
+}
+
+function renderTypingQuestion() {
+  if (typingWords.length === 0) return;
+  const q = typingWords[currentTypingIdx % typingWords.length];
+  document.getElementById('typing-prompt').innerHTML = `
+    <div style="font-size:14px; color:var(--text2); margin-bottom:8px;">이 문장을 중국어로 입력하세요:</div>
+    <div style="font-size:16px; margin-bottom:8px;">${q.korean}</div>
+    <div style="font-size:13px; color:var(--warning);">핵심 단어: ${q.word} (${q.pinyin})</div>`;
+  document.getElementById('typing-input').value = '';
+  document.getElementById('typing-answer').style.display = 'none';
+  document.getElementById('typing-answer-text').textContent = q.chinese;
+  document.getElementById('typing-btns').innerHTML = '<button class="btn btn-primary btn-block" onclick="showTypingAnswer()">정답 확인</button>';
+
+  setTimeout(() => document.getElementById('typing-input').focus(), 100);
+}
+
+function showTypingAnswer() {
+  const answer = document.getElementById('typing-answer');
+  answer.style.display = 'block';
+  const input = document.getElementById('typing-input').value.trim();
+  const correct = typingWords[currentTypingIdx % typingWords.length].chinese;
+
+  // Highlight matching characters (with punctuation normalization)
+  const normalizedInput = normalizePunct(input);
+  const normalizedCorrect = normalizePunct(correct);
+  let html = '';
+  for (let i = 0; i < correct.length; i++) {
+    const normalizedInputChar = normalizePunct(input[i] || '');
+    const normalizedCorrectChar = normalizePunct(correct[i] || '');
+    if (normalizedInputChar === normalizedCorrectChar) {
+      html += `<span style="color:var(--success);">${correct[i]}</span>`;
+    } else {
+      html += `<span style="color:var(--danger);">${correct[i]}</span>`;
+    }
+  }
+  document.getElementById('typing-answer-text').innerHTML = html + `<div style="font-size:13px; color:var(--warning); margin-top:6px;">${toPinyin(correct)}</div>`;
+  recordReview();
+}
+
+function nextTypingQuestion() {
+  currentTypingIdx++;
+  if (typingMode === 'type') renderTypingQuestion();
+  else renderOrderQuestion();
+}
+
+// =================== TYPING MODE TOGGLE ===================
+let typingMode = 'type';
+
+function setTypingMode(mode) {
+  typingMode = mode;
+  document.getElementById('tmode-type').classList.toggle('active', mode === 'type');
+  document.getElementById('tmode-order').classList.toggle('active', mode === 'order');
+  document.getElementById('typing-type-area').style.display = mode === 'type' ? 'block' : 'none';
+  document.getElementById('typing-order-area').style.display = mode === 'order' ? 'block' : 'none';
+  if (mode === 'order') renderOrderQuestion();
+  else renderTypingQuestion();
+}
+
+// =================== WORD ORDER QUIZ ===================
+let orderState = { answer: [], selected: [], remaining: [] };
+
+function segmentSentence(sentence) {
+  // Extract trailing punctuation
+  const punct = sentence.match(/[。？！，、；：""''（）「」]+$/);
+  const clean = punct ? sentence.slice(0, -punct[0].length) : sentence;
+
+  // Build word set from hskWords for dictionary-based segmentation
+  const wordSet = new Set();
+  if (hskWords && hskWords.length > 0) {
+    for (const w of hskWords) {
+      wordSet.add(w.chinese);
+    }
+  }
+
+  // Greedy longest-match segmentation
+  const segments = [];
+  let i = 0;
+  while (i < clean.length) {
+    let matched = false;
+    // Try longest first (4 chars down to 2)
+    for (let len = Math.min(4, clean.length - i); len >= 2; len--) {
+      const candidate = clean.slice(i, i + len);
+      if (wordSet.has(candidate)) {
+        segments.push(candidate);
+        i += len;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
+      // Single character (common for 的, 了, 在, 是, etc.)
+      segments.push(clean[i]);
+      i++;
+    }
+  }
+
+  if (punct) segments.push(punct[0]);
+  return segments;
+}
+
+function renderOrderQuestion() {
+  if (typingWords.length === 0) return;
+  const q = typingWords[currentTypingIdx % typingWords.length];
+
+  const segments = segmentSentence(q.chinese);
+  orderState.answer = [...segments];
+  orderState.selected = [];
+  orderState.remaining = [...segments].sort(() => Math.random() - 0.5);
+
+  document.getElementById('order-prompt').innerHTML = `
+    <div style="font-size:14px; color:var(--text2); margin-bottom:8px;">단어를 올바른 순서로 배열하세요:</div>
+    <div style="font-size:16px; margin-bottom:8px;">${q.korean}</div>
+    <div style="font-size:13px; color:var(--warning);">핵심 단어: ${q.word} (${q.pinyin})</div>`;
+
+  updateOrderDisplay();
+  document.getElementById('order-feedback').style.display = 'none';
+}
+
+let swapState = { selectedIdx: -1 }; // tap-to-swap
+
+function updateOrderDisplay() {
+  const selContainer = document.getElementById('order-selected');
+  if (orderState.selected.length === 0) {
+    selContainer.innerHTML = '<span style="color:#555;">아래 단어를 탭하여 배열하세요</span>';
+    swapState.selectedIdx = -1;
+  } else {
+    selContainer.innerHTML = orderState.selected.map((s, i) => {
+      const isSelected = swapState.selectedIdx === i;
+      return `<span class="order-chip" data-idx="${i}" style="display:inline-flex;flex-direction:column;align-items:center;padding:6px 12px;margin:3px;background:${isSelected ? 'var(--accent)' : 'var(--accent2)'};border-radius:8px;cursor:pointer;user-select:none;transition:all .15s;${isSelected ? 'transform:scale(1.1);box-shadow:0 0 12px rgba(233,69,96,0.5);' : ''}">
+        <span style="font-size:18px;pointer-events:none;">${s}</span>
+      </span>`;
+    }).join('') + `<div style="font-size:10px;color:var(--text2);margin-top:4px;">${swapState.selectedIdx >= 0 ? '이동할 위치를 탭하세요 (길게 누르면 제거)' : '탭: 위치 이동 / 길게 누르기: 제거'}</div>`;
+
+    // Attach handlers
+    selContainer.querySelectorAll('.order-chip').forEach(chip => {
+      let holdTimer = null;
+      let held = false;
+
+      chip.addEventListener('touchstart', (e) => {
+        held = false;
+        holdTimer = setTimeout(() => {
+          held = true;
+          // Long press = remove
+          unselectOrder(parseInt(chip.dataset.idx));
+          swapState.selectedIdx = -1;
+          if (navigator.vibrate) navigator.vibrate(30);
+        }, 500);
+      }, { passive: true });
+
+      chip.addEventListener('touchend', (e) => {
+        clearTimeout(holdTimer);
+        if (held) return;
+        handleChipTap(parseInt(chip.dataset.idx));
+      });
+
+      chip.addEventListener('touchmove', () => { clearTimeout(holdTimer); }, { passive: true });
+
+      // Mouse fallback
+      chip.addEventListener('click', (e) => {
+        handleChipTap(parseInt(chip.dataset.idx));
+      });
+    });
+  }
+
+  const choicesContainer = document.getElementById('order-choices');
+  choicesContainer.innerHTML =
+    orderState.remaining.map((s, i) => {
+      // Only show meaning for words user hasn't learned yet
+      const hint = getOrderHint(s);
+      return `<span data-order-idx="${i}" style="display:inline-flex;flex-direction:column;align-items:center;padding:8px 14px;background:var(--card);border:1px solid #444;border-radius:10px;cursor:pointer;transition:all .15s;user-select:none;">
+        <span style="font-size:18px;pointer-events:none;">${s}</span>
+        ${hint ? `<span style="font-size:10px;color:var(--text2);margin-top:2px;pointer-events:none;">${hint}</span>` : ''}
+      </span>`;
+    }).join('');
+  choicesContainer.querySelectorAll('[data-order-idx]').forEach(span => {
+    span.addEventListener('click', () => selectOrder(parseInt(span.dataset.orderIdx)));
+  });
+}
+
+// --- Tap to swap positions ---
+function handleChipTap(idx) {
+  if (swapState.selectedIdx === -1) {
+    // First tap: select this chip
+    swapState.selectedIdx = idx;
+    updateOrderDisplay();
+  } else if (swapState.selectedIdx === idx) {
+    // Tap same chip: deselect
+    swapState.selectedIdx = -1;
+    updateOrderDisplay();
+  } else {
+    // Second tap: move selected chip to this position
+    const arr = orderState.selected;
+    const item = arr.splice(swapState.selectedIdx, 1)[0];
+    arr.splice(idx, 0, item);
+    swapState.selectedIdx = -1;
+    updateOrderDisplay();
+  }
+}
+
+// Build sentence structure analysis for word order quiz
+function buildSentenceAnalysis(segments, fullSentence) {
+  const analysis = segments.map(seg => {
+    if (!seg || /^[。？！，、；：""''（）]+$/.test(seg)) return null;
+    const w = hskWords.find(x => x.chinese === seg);
+    if (w) {
+      return { seg, pinyin: w.pinyin, meaning: w.meaning, pos: w.pos || '', role: getGrammarRole(w, seg, segments) };
+    }
+    let found = null;
+    for (const cw of hskWords) {
+      if (seg.includes(cw.chinese) && cw.chinese.length >= 2) { found = cw; break; }
+    }
+    if (found) return { seg, pinyin: found.pinyin, meaning: found.meaning, pos: found.pos || '', role: getGrammarRole(found, seg, segments) };
+    return { seg, pinyin: toPinyin(seg), meaning: '', pos: '', role: '' };
+  }).filter(Boolean);
+
+  if (analysis.length === 0) return '';
+
+  const roleColors = {
+    '주어': '#60a5fa', '목적어': '#38bdf8',
+    '서술어': '#f87171', '보어': '#fb7185',
+    '관형어': '#4ade80', '부사어': '#a78bfa',
+    '전치사구': '#fbbf24', '조동사': '#fb923c',
+    '접속사': '#94a3b8', '어기조사': '#94a3b8',
+    '결과보어': '#f472b6', '방향보어': '#f472b6',
+    '시간명사': '#2dd4bf', '양사구': '#2dd4bf',
+  };
+
+  let html = '<div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;">';
+  for (const a of analysis) {
+    const color = roleColors[a.role] || '#aaa';
+    html += `<div style="text-align:center; padding:4px 6px; background:${color}15; border-radius:6px; border:1px solid ${color}33;">
+      <div style="font-size:16px; font-weight:600;">${a.seg}</div>
+      <div style="font-size:10px; color:var(--warning);">${a.pinyin || ''}</div>
+      <div style="font-size:10px; color:${color}; font-weight:700;">${a.role}</div>
+      <div style="font-size:10px; color:var(--text2); max-width:80px;">${a.meaning.split(',')[0].split('，')[0] || ''}</div>
+    </div>`;
+  }
+  html += '</div>';
+
+  // Build structure string from actual roles
+  const roles = analysis.map(a => a.role).filter(r => r);
+  const uniqueRoles = [];
+  for (const r of roles) { if (!uniqueRoles.includes(r)) uniqueRoles.push(r); }
+  html += `<div style="font-size:11px; color:var(--text2);">문장 성분: ${uniqueRoles.map(r => `<span style="color:${roleColors[r] || '#aaa'};">${r}</span>`).join(' → ')}</div>`;
+
+  // Sentence pattern classification
+  const pattern = classifySentencePattern(segments, analysis);
+  if (pattern) {
+    html += `<div style="margin-top:8px; padding:8px; background:var(--card); border-radius:8px; border-left:3px solid var(--accent);">
+      <div style="font-size:12px; font-weight:700; color:var(--accent); margin-bottom:3px;">${pattern.name}</div>
+      <div style="font-size:11px; color:var(--text2);">${pattern.desc}</div>
+      <div style="font-size:11px; color:var(--warning); margin-top:2px;">${pattern.structure}</div>
+    </div>`;
+  }
+
+  return html;
+}
+
+// Classify sentence pattern (HSK grammar types)
+function classifySentencePattern(segments, analysis) {
+  const segs = segments;
+  const hasWord = (w) => segs.includes(w);
+  const roles = analysis.map(a => a.role);
+
+  // Collect all patterns that match (can be multiple)
+  const patterns = [];
+
+  // === 1. 확실한 구문 표지 (키워드 기반) ===
+
+  // 把자문: 把 + noun + verb (把 뒤에 명사/대명사, 그 뒤에 동사)
+  if (hasWord('把')) {
+    const baIdx = segs.indexOf('把');
+    const afterBa = analysis.slice(baIdx + 1);
+    const hasNounThenVerb = afterBa.some(a => ['주어','목적어'].includes(a.role)) && afterBa.some(a => a.role === '서술어' || a.role === '결과보어');
+    if (hasNounThenVerb) {
+      patterns.push({ name: '把자문 (把字句)', desc: '목적어를 동사 앞으로 이동시켜 처치·처리를 강조', structure: '주어 + 把 + 목적어 + 동사 + 보어/결과' });
+    }
+  }
+  // 被자문
+  if (hasWord('被')) {
+    patterns.push({ name: '피동문 (被字句)', desc: '주어가 동작을 당하는 피동 표현', structure: '주어(받는 자) + 被 + (행위자) + 동사' });
+  }
+  // 비교문
+  if (hasWord('比')) {
+    patterns.push({ name: '비교문 (比字句)', desc: '두 대상을 비교하는 표현', structure: 'A + 比 + B + 형용사' });
+  }
+  // 겸어문: 让/请/叫/使 + person + verb
+  const jianyuWords = ['让','请','叫','使'];
+  if (jianyuWords.some(w => hasWord(w))) {
+    const triggerIdx = segs.findIndex(s => jianyuWords.includes(s));
+    const after = analysis.slice(triggerIdx + 1);
+    if (after.some(a => a.role === '서술어')) {
+      patterns.push({ name: '겸어문 (兼语句)', desc: '첫 번째 동사의 목적어가 두 번째 동사의 주어', structure: '주어 + 让/请/叫 + 사람 + 동사' });
+    }
+  }
+  // 是...的 강조구문
+  if (hasWord('是') && hasWord('的') && segs.indexOf('是') < segs.indexOf('的')) {
+    patterns.push({ name: '是...的 강조구문', desc: '이미 발생한 사실의 시간·장소·방식 등을 강조', structure: '주어 + 是 + (강조 내용) + 동사 + 的' });
+  }
+
+  // === 2. 보어 구문 (구조 기반) ===
+
+  // 정도보어 (得 구문)
+  if (hasWord('得') && roles.some(r => r === '정도보어 조사')) {
+    patterns.push({ name: '정도보어 (程度补语)', desc: '동작의 정도/상태를 보충 설명', structure: '동사 + 得 + 형용사/상태' });
+  }
+  // 결과보어
+  if (roles.includes('결과보어')) {
+    patterns.push({ name: '결과보어 (结果补语)', desc: '동사 뒤에 동작의 결과를 보충 (看见, 听懂, 做完 등)', structure: '동사 + 결과동사(见/懂/完/到 등)' });
+  }
+  // 동량보어 / 시량보어
+  const qIdx = roles.indexOf('양사구');
+  if (qIdx > 0 && analysis.slice(0, qIdx).some(a => a.role === '서술어')) {
+    const qSeg = analysis[qIdx].seg;
+    if (['次','遍','回','趟'].some(w => qSeg.includes(w) || segs.includes(w))) {
+      patterns.push({ name: '동량보어 (动量补语)', desc: '동작의 횟수를 나타냄', structure: '동사 + 숫자 + 동량사(次/遍/回)' });
+    } else {
+      patterns.push({ name: '시량보어 (时量补语)', desc: '동작의 지속 시간을 나타냄', structure: '동사 + 시간 길이(两个小时 등)' });
+    }
+  }
+
+  // === 3. 구조 기반 판별 (키워드 없이) ===
+
+  // 존현문
+  if (hasWord('有') && analysis.length > 0 && !['주어','부사어'].includes(analysis[0]?.role)) {
+    patterns.push({ name: '존현문 (存现句)', desc: '어떤 장소에 사물이 존재·출현·소실함을 표현', structure: '장소 + 有/동사 + 사물' });
+  }
+  // 전치사구 구문
+  if (roles.includes('전치사구')) {
+    const prepWord = segs.find(s => ['在','从','对','向','给','跟','往','为'].includes(s));
+    if (prepWord) {
+      const prepNames = {'在':'장소','从':'출발점','对':'대상','向':'방향','给':'수혜자','跟':'동반','往':'방향','为':'목적'};
+      patterns.push({ name: '전치사구 구문', desc: `"${prepWord}"가 ${prepNames[prepWord] || '대상'}을 나타냄 (동사 앞에 위치)`, structure: `주어 + ${prepWord} + 대상 + 동사` });
+    }
+  }
+  // 조동사 구문
+  if (roles.includes('조동사')) {
+    const auxWord = segs.find(s => ['会','能','可以','想','要','应该','必须','可能','需要','愿意','敢'].includes(s));
+    if (auxWord) {
+      const auxDesc = {'会':'능력/가능','能':'능력/허가','可以':'허가/가능','想':'희망','要':'의지/필요','应该':'당위','必须':'필수','可能':'추측','需要':'필요','愿意':'의원','敢':'용감'};
+      patterns.push({ name: '조동사 구문', desc: `"${auxWord}" = ${auxDesc[auxWord] || '조동사'} (동사 앞에서 의미 보충)`, structure: `주어 + ${auxWord} + 동사 + 목적어` });
+    }
+  }
+
+  // 연동문: 매우 엄격하게 - 두 동사 사이에 목적어가 있어야 함
+  // 예: 去商店买东西 (去+목적어+买+목적어)
+  const verbPositions = [];
+  analysis.forEach((a, i) => { if (a.role === '서술어') verbPositions.push(i); });
+  if (verbPositions.length >= 2 && patterns.length === 0) {
+    // 두 서술어 사이에 목적어가 있고, 겸어문/把/被가 아닌 경우만
+    const v1 = verbPositions[0], v2 = verbPositions[1];
+    const between = analysis.slice(v1 + 1, v2);
+    const hasObjBetween = between.some(a => a.role === '목적어');
+    const notAdjacent = v2 - v1 > 1; // 인접하면 결과보어일 가능성
+    if (hasObjBetween && notAdjacent) {
+      patterns.push({ name: '연동문 (连动句)', desc: '하나의 주어가 두 동작을 순서대로 수행 (앞 동작이 뒷 동작의 목적/방식)', structure: '주어 + 동사① + 목적어 + 동사② + 목적어' });
+    }
+  }
+
+  // Return first (most important) pattern, or null
+  return patterns.length > 0 ? patterns[0] : null;
+}
+
+// Determine detailed grammar role of a word in context
+function getGrammarRole(word, seg, allSegments) {
+  const pos = word.pos || '';
+  const idx = allSegments.indexOf(seg);
+  const total = allSegments.length;
+
+  // 조사/어기조사 (了, 吗, 呢, 的, 得, 地, 着, 过, 吧)
+  const particles = {'了':'어기조사','吗':'어기조사','呢':'어기조사','吧':'어기조사','的':'관형어 조사','得':'정도보어 조사','地':'부사어 조사','着':'진행 조사','过':'경험 조사'};
+  if (particles[seg]) return particles[seg];
+
+  // 조동사 (会, 能, 可以, 想, 要, 应该, 必须, etc.)
+  if (pos === '조동사') return '조동사';
+
+  // 전치사 (在, 从, 对, 给, 向, 把, 被, 比, etc.)
+  if (pos === '전치사') return '전치사구';
+
+  // 접속사
+  if (pos === '접속사') return '접속사';
+
+  // 부사
+  if (pos === '부사') return '부사어';
+
+  // 수사/양사
+  if (pos === '수사' || pos === '양사') return '양사구';
+
+  // 형용사 - can be predicate or modifier
+  if (pos === '형용사') {
+    // If at end or before 了, it's predicate
+    if (idx >= total - 2) return '서술어';
+    // If before a noun, it's modifier
+    const nextSeg = allSegments[idx + 1];
+    const nextW = nextSeg ? hskWords.find(x => x.chinese === nextSeg) : null;
+    if (nextW && (nextW.pos === '명사' || nextW.pos === '고유명사')) return '관형어';
+    return '서술어';
+  }
+
+  // 동사/이합동사
+  if (pos === '동사' || pos === '이합동사') {
+    // Check if this is a resultative complement (verb after another verb)
+    if (idx > 0) {
+      const prevSeg = allSegments[idx - 1];
+      const prevW = prevSeg ? hskWords.find(x => x.chinese === prevSeg) : null;
+      if (prevW && (prevW.pos === '동사' || prevW.pos === '이합동사')) return '결과보어';
+    }
+    return '서술어';
+  }
+
+  // 명사/대명사/고유명사
+  if (['명사', '대명사', '고유명사'].includes(pos)) {
+    // First noun is likely subject, later ones are objects
+    let nounCount = 0;
+    for (let j = 0; j <= idx; j++) {
+      const sw = hskWords.find(x => x.chinese === allSegments[j]);
+      if (sw && ['명사', '대명사', '고유명사'].includes(sw.pos)) nounCount++;
+    }
+    // Check if there's a verb before this noun
+    let verbBefore = false;
+    for (let j = 0; j < idx; j++) {
+      const sw = hskWords.find(x => x.chinese === allSegments[j]);
+      if (sw && (sw.pos === '동사' || sw.pos === '이합동사')) verbBefore = true;
+    }
+    if (!verbBefore) return '주어';
+    return '목적어';
+  }
+
+  return pos || '';
+}
+
+// 이합동사 판별: pos가 '이합동사' 또는 '이합'이거나, hskWords에서 매칭
+function isIhap(w) {
+  if (w.pos === '이합동사' || w.pos === '이합') return true;
+  // Check hskWords for matching word
+  if (hskWords && hskWords.length > 0) {
+    const hw = hskWords.find(x => x.chinese === w.chinese);
+    if (hw && hw.pos === '이합동사') return true;
+  }
+  return false;
+}
+
+// 이합동사 helper: highlight characters in sentence
+function highlightIhap(sentence, chinese) {
+  const chars = chinese.replace(/[（）()\s]/g, '');
+  let result = sentence;
+  for (const ch of chars) {
+    result = result.replace(ch, `<span style="color:#f472b6;font-weight:700;text-decoration:underline;">${ch}</span>`);
+  }
+  return result;
+}
+
+function buildIhapNote(chinese) {
+  const chars = chinese.replace(/[（）()\s]/g, '');
+  if (chars.length < 2) return '';
+  const c1 = chars[0], c2 = chars.slice(1);
+  return `<div style="margin-top:6px;padding:6px 8px;background:#f472b615;border-radius:6px;border:1px solid #f472b633;font-size:11px;">
+    <span style="color:#f472b6;font-weight:700;">이합동사</span>
+    <span style="color:var(--text2);"> ${c1}<span style="color:var(--warning);">+了/过/着+</span>${c2}</span>
+    <span style="color:var(--text2);"> 예: ${c1}<span style="color:var(--warning);">了</span>${c2} / ${c1}<span style="color:var(--warning);">过</span>${c2}</span>
+  </div>`;
+}
+
+// Show hint only for words user hasn't learned yet (SRS level 0, never seen)
+function getOrderHint(text) {
+  if (!hskWords || hskWords.length === 0) return '';
+  const w = hskWords.find(x => x.chinese === text);
+  if (!w) return '';
+  const s = getVocabSRS(w.id);
+  // Already learned (seen at least once) → hide meaning
+  if (s.correct > 0 || s.wrong > 0) return '';
+  // New word → show meaning as hint
+  return w.meaning.split(',')[0].split('，')[0].trim();
+}
+
+// Lookup Chinese word/segment meaning from hskWords
+function lookupChineseWord(text) {
+  if (!hskWords || hskWords.length === 0) return '';
+  // Try exact match first
+  const exact = hskWords.find(w => w.chinese === text);
+  if (exact) return exact.meaning.split(',')[0].split('，')[0].trim();
+  // Try finding a word contained in the segment
+  if (text.length >= 2) {
+    const partial = hskWords.find(w => text.includes(w.chinese) && w.chinese.length >= 2);
+    if (partial) return partial.meaning.split(',')[0].split('，')[0].trim();
+  }
+  return '';
+}
+
+function selectOrder(idx) {
+  const word = orderState.remaining.splice(idx, 1)[0];
+  orderState.selected.push(word);
+  updateOrderDisplay();
+}
+
+function unselectOrder(idx) {
+  const word = orderState.selected.splice(idx, 1)[0];
+  orderState.remaining.push(word);
+  updateOrderDisplay();
+}
+
+function resetOrder() {
+  orderState.selected = [];
+  orderState.remaining = [...orderState.answer].sort(() => Math.random() - 0.5);
+  updateOrderDisplay();
+  document.getElementById('order-feedback').style.display = 'none';
+}
+
+function checkOrder() {
+  const userAnswer = orderState.selected.join('');
+  const correctAnswer = orderState.answer.join('');
+  const correct = normalizePunct(userAnswer) === normalizePunct(correctAnswer);
+  const q = typingWords[currentTypingIdx % typingWords.length];
+  if (!correct) {
+    addWrongItem('order', { sentence: q.chinese, sentenceKo: q.korean, chinese: q.word, pinyin: q.pinyin });
+  }
+
+  const fb = document.getElementById('order-feedback');
+  fb.style.display = 'block';
+  fb.style.background = correct ? '#22c55e22' : '#ef444422';
+  fb.innerHTML = `
+    <div style="color:${correct ? 'var(--success)' : 'var(--danger)'}; font-weight:600; margin-bottom:8px;">
+      ${correct ? '정답!' : '오답!'}
+    </div>
+    <div style="font-size:14px; color:var(--text2); margin-bottom:4px;">정답:</div>
+    <div style="font-size:20px;">${correctAnswer}</div>
+    <div style="font-size:13px; color:var(--warning); margin-top:4px;">${toPinyin(correctAnswer)}</div>
+    <div style="margin-top:12px; padding:12px; background:var(--bg); border-radius:10px;">
+      <div style="font-size:12px; color:var(--accent); font-weight:600; margin-bottom:8px;">문장 해설</div>
+      ${buildSentenceAnalysis(orderState.answer, correctAnswer)}
+    </div>
+    <div id="ask-ai-area" style="margin-top:12px;">
+      <button class="btn btn-outline btn-block" style="border-color:#a78bfa;color:#a78bfa;" id="order-ask-ai-btn">AI에게 질문하기</button>
+    </div>
+    <button class="btn btn-primary btn-block" style="margin-top:8px;" id="order-next-btn">다음</button>`;
+
+  recordReview();
+
+  // Attach next button
+  document.getElementById('order-next-btn')?.addEventListener('click', () => { currentTypingIdx++; renderOrderQuestion(); });
+  // Attach AI question button (reuse q from above, don't redeclare)
+  document.getElementById('order-ask-ai-btn')?.addEventListener('click', () => {
+    showAskAIPanel('ask-ai-area', correctAnswer, q.korean);
+  });
+}
+
+// =================== AI QUESTION (Clipboard + Open App) ===================
+let _askSentence = '', _askKorean = '';
+
+function toggleAskAI(sentence, korean) {
+  showAskAIPanel('ask-ai-area', sentence, korean);
+}
+
+function showAskAIPanel(containerId, sentence, korean) {
+  _askSentence = sentence;
+  _askKorean = korean;
+  const area = document.getElementById(containerId);
+  if (!area) return;
+  area.innerHTML = `
+    <div style="background:var(--card); border-radius:12px; padding:12px; border:1px solid #a78bfa33;">
+      <div style="font-size:12px; color:#a78bfa; font-weight:600; margin-bottom:8px;">무엇이 궁금한가요?</div>
+      <textarea id="ask-ai-input" placeholder="예: 왜 把를 여기서 쓰나요? / 이 문장은 무슨 문형인가요?" style="width:100%;padding:10px;font-size:14px;background:var(--bg);border:1px solid #333;border-radius:8px;color:var(--text);outline:none;resize:none;min-height:50px;"></textarea>
+      <button class="btn btn-block" style="margin-top:8px;background:#a78bfa;color:white;font-weight:600;" id="copy-ask-btn">질문 복사하기</button>
+    </div>`;
+  document.getElementById('copy-ask-btn').addEventListener('click', () => copyAndToast());
+  setTimeout(() => document.getElementById('ask-ai-input')?.focus(), 100);
+}
+
+function copyAndToast() {
+  const sentence = _askSentence;
+  const korean = _askKorean;
+  const question = document.getElementById('ask-ai-input')?.value?.trim() || '이 문장의 문법 구조를 자세히 설명해주세요';
+  const prompt = `중국어 문장을 공부하고 있습니다.
+
+문장: ${sentence}
+해석: ${korean}
+병음: ${toPinyin(sentence)}
+
+질문: ${question}
+
+HSK 4급 수준으로 쉽게 설명해주세요. 문장 성분(주어/서술어/목적어/보어 등)과 문형(把자문, 겸어문, 연동문 등)도 알려주세요.`;
+
+  navigator.clipboard.writeText(prompt).then(() => {
+    toast('복사 완료!');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = prompt;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('복사 완료!');
+  });
+}
+
+// =================== WRONG ITEMS TRACKER ===================
+let wrongFilter = 'all';
+
+function getWrongItems() {
+  return JSON.parse(localStorage.getItem('hsk4_wrong') || '[]');
+}
+function saveWrongItems(items) {
+  localStorage.setItem('hsk4_wrong', JSON.stringify(items));
+}
+
+function addWrongItem(type, data) {
+  const items = getWrongItems();
+  // Avoid duplicates (same type + chinese)
+  const key = type + '_' + (data.chinese || data.sentence || '');
+  const existing = items.findIndex(x => (x.type + '_' + (x.chinese || x.sentence || '')) === key);
+  if (existing >= 0) {
+    items[existing].count = (items[existing].count || 1) + 1;
+    items[existing].lastWrong = Date.now();
+    items[existing].resolved = false;
+  } else {
+    items.push({
+      type,
+      chinese: data.chinese || '',
+      pinyin: data.pinyin || '',
+      meaning: data.meaning || '',
+      sentence: data.sentence || '',
+      sentenceKo: data.sentenceKo || '',
+      count: 1,
+      lastWrong: Date.now(),
+      resolved: false
+    });
+  }
+  saveWrongItems(items);
+  updateWrongCount();
+}
+
+function resolveWrongItem(type, chinese) {
+  const items = getWrongItems();
+  const key = type + '_' + chinese;
+  const item = items.find(x => (x.type + '_' + (x.chinese || x.sentence || '')) === key);
+  if (item) item.resolved = true;
+  saveWrongItems(items);
+  updateWrongCount();
+}
+
+function updateWrongCount() {
+  const items = getWrongItems().filter(x => !x.resolved);
+  const el = document.getElementById('home-wrong-count');
+  if (el) el.textContent = items.length > 0 ? `${items.length}개 - 복습하기` : '없음';
+}
+
+function filterWrong(type) {
+  wrongFilter = type;
+  document.querySelectorAll('#wrong-type-chips .chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.type === type);
+  });
+  renderWrongList();
+}
+
+function renderWrongList() {
+  let items = getWrongItems().filter(x => !x.resolved);
+  if (wrongFilter !== 'all') items = items.filter(x => x.type === wrongFilter);
+  items.sort((a, b) => (b.count || 1) - (a.count || 1));
+
+  const el = document.getElementById('wrong-total-count');
+  if (el) el.textContent = `${items.length}개`;
+
+  const typeLabels = { vocab: '단어', sentence: '문장', order: '어순', notes: '노트', typing: '타이핑' };
+  const container = document.getElementById('wrong-list');
+  if (items.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div style="font-size:36px;margin-bottom:8px;">&#x1F389;</div><div>틀린 문제가 없어요!</div></div>';
+    return;
+  }
+  container.innerHTML = items.map((item, i) => `
+    <div style="padding:12px; background:var(--card); border-radius:12px; margin-bottom:8px;">
+      <div style="display:flex; justify-content:space-between; align-items:start;">
+        <div>
+          <span style="font-size:10px; padding:2px 6px; background:var(--danger)22; color:var(--danger); border-radius:4px;">${typeLabels[item.type] || item.type}</span>
+          <span style="font-size:10px; color:var(--text2); margin-left:4px;">${item.count}회 틀림</span>
+        </div>
+      </div>
+      <div style="font-size:18px; font-weight:600; margin-top:6px;">${item.chinese || item.sentence || ''}</div>
+      ${item.pinyin ? `<div style="font-size:12px; color:var(--warning);">${item.pinyin}</div>` : ''}
+      <div style="font-size:13px; color:var(--text2);">${item.meaning || item.sentenceKo || ''}</div>
+    </div>
+  `).join('');
+}
+
+function startWrongReview() {
+  let items = getWrongItems().filter(x => !x.resolved);
+  if (wrongFilter !== 'all') items = items.filter(x => x.type === wrongFilter);
+
+  // Filter to vocab-type items that have sentences
+  const vocabItems = items.filter(x => x.type === 'vocab' || x.type === 'notes');
+  if (vocabItems.length === 0) {
+    toast('복습할 단어 문제가 없습니다');
+    return;
+  }
+
+  // Build queue from hskWords or secretNotes
+  const queue = [];
+  for (const item of vocabItems) {
+    const w = hskWords.find(x => x.chinese === item.chinese && x.sentence);
+    if (w) queue.push(w);
+  }
+  if (queue.length === 0) { toast('복습할 문제가 없습니다'); return; }
+
+  queue.sort(() => Math.random() - 0.5);
+  vsState = {
+    queue: queue.slice(0, 30),
+    current: 0, score: 0, totalAnswered: 0,
+    wrongQueue: [], startTime: 0, answered: false,
+    results: [], sessionId: 0
+  };
+  showPage('vocabsession');
+  renderVocabQuestion();
+}
+
+function clearResolvedWrong() {
+  const items = getWrongItems().filter(x => !x.resolved);
+  saveWrongItems(items);
+  renderWrongList();
+  toast('정리 완료');
+}
+
+// =================== DAILY REVIEW ===================
+
+function startDailyReview(words) {
+  wqState = { words, current: 0, score: 0 };
+  showPage('wordquiz');
+  renderWordQuiz();
+}
+
+// =================== VOCAB - 14 Day Plan ===================
+let hskWords = [];
+let vocabFilter = 'all';
+let vsState = null;
+
+// 14-day plan: {day, idFrom, idTo, daily target}
+const PLAN = [
+  { day:1,  from:1,   to:150,  label:'1급 학습' },
+  { day:2,  from:151, to:300,  label:'2급 학습' },
+  { day:3,  from:301, to:400,  label:'3급 전반' },
+  { day:4,  from:401, to:500,  label:'3급 중반' },
+  { day:5,  from:501, to:600,  label:'3급 후반' },
+  { day:6,  from:601, to:675,  label:'4급 ①' },
+  { day:7,  from:676, to:750,  label:'4급 ②' },
+  { day:8,  from:751, to:825,  label:'4급 ③' },
+  { day:9,  from:826, to:900,  label:'4급 ④' },
+  { day:10, from:901, to:1000, label:'4급 ⑤' },
+  { day:11, from:1001,to:1100, label:'4급 ⑥' },
+  { day:12, from:1101,to:1200, label:'4급 ⑦' },
+  { day:13, from:1,   to:600,  label:'1~3급 총복습' },
+  { day:14, from:601, to:1200, label:'4급 총복습' },
+];
+
+// 5 sessions per day
+const SESSIONS = [
+  { id: 1, icon: '🌅', name: '출근 1', desc: '새 단어 학습', time: '출근길', type: 'new', size: 50 },
+  { id: 2, icon: '🚇', name: '출근 2', desc: '새 단어 학습', time: '출근길', type: 'new', size: 50 },
+  { id: 3, icon: '☀️', name: '출근 3', desc: '새 단어 학습', time: '출근길', type: 'new', size: 50 },
+  { id: 4, icon: '🌆', name: '퇴근', desc: '오늘 배운 단어 복습', time: '퇴근길', type: 'today_review', size: 30 },
+  { id: 5, icon: '🌙', name: '자기 전', desc: '틀렸거나 느린 단어 복습', time: '자기 전', type: 'today_weak', size: 30 },
+];
+
+function getPlanState() {
+  let state = JSON.parse(localStorage.getItem('hsk4_plan') || 'null');
+  if (!state) {
+    state = { startDate: new Date().toDateString(), completedSessions: {} };
+    localStorage.setItem('hsk4_plan', JSON.stringify(state));
+  }
+  return state;
+}
+
+function savePlanState(state) {
+  localStorage.setItem('hsk4_plan', JSON.stringify(state));
+}
+
+function getPlanDay() {
+  const state = getPlanState();
+  const start = new Date(state.startDate);
+  const now = new Date();
+  const diff = Math.floor((now - start) / 86400000) + 1;
+  return Math.min(Math.max(diff, 1), 14);
+}
+
+function getTodayPlan() {
+  const day = getPlanDay();
+  return PLAN[day - 1];
+}
+
+function getTodaySessionKey(sessionId) {
+  return new Date().toDateString() + '_s' + sessionId;
+}
+
+function isSessionDone(sessionId) {
+  const state = getPlanState();
+  return !!state.completedSessions[getTodaySessionKey(sessionId)];
+}
+
+function markSessionDone(sessionId) {
+  const state = getPlanState();
+  state.completedSessions[getTodaySessionKey(sessionId)] = true;
+  savePlanState(state);
+}
+
+async function loadHskWords() {
+  try {
+    const res = await fetch('data/hskWords.json');
+    hskWords = await res.json();
+    updateVocabPage();
+  } catch(e) { console.error('Failed to load HSK words:', e); }
+}
+
+function getVocabSRS(wordId) {
+  const key = 'hsk_' + wordId;
+  if (!srsData[key]) {
+    srsData[key] = { level: 0, nextReview: 0, correct: 0, wrong: 0, avgTime: 0 };
+  }
+  return srsData[key];
+}
+
+function updateVocabSRS(wordId, correct, responseTime) {
+  const key = 'hsk_' + wordId;
+  const s = getVocabSRS(wordId);
+  const intervals = [0, 0.5, 1, 3, 7, 14, 30, 60];
+
+  if (correct) {
+    if (responseTime < 3000) {
+      s.level = Math.min(s.level + 2, intervals.length - 1);
+    } else if (responseTime < 5000) {
+      s.level = Math.min(s.level + 1, intervals.length - 1);
+    }
+    s.correct++;
+  } else {
+    s.level = 0;
+    s.wrong++;
+  }
+
+  const total = s.correct + s.wrong;
+  s.avgTime = total <= 1 ? responseTime : Math.round(s.avgTime * 0.7 + responseTime * 0.3);
+  s.nextReview = Date.now() + intervals[s.level] * 86400000;
+  saveSRS();
+}
+
+function getTodayWords() {
+  const plan = getTodayPlan();
+  return hskWords.filter(w => w.id >= plan.from && w.id <= plan.to && w.sentence);
+}
+
+function getDueVocabWords(wordPool) {
+  const pool = wordPool || hskWords;
+  return pool.filter(w => {
+    if (!w.sentence) return false;
+    const s = getVocabSRS(w.id);
+    if (s.level === 0 && (s.correct > 0 || s.wrong > 0)) return true;
+    return s.level > 0 && s.nextReview <= Date.now();
+  });
+}
+
+function getNewVocabWords(wordPool) {
+  const pool = wordPool || hskWords;
+  return pool.filter(w => {
+    if (!w.sentence) return false;
+    const s = getVocabSRS(w.id);
+    return s.level === 0 && s.correct === 0 && s.wrong === 0;
+  });
+}
+
+function updateVocabPage() {
+  if (hskWords.length === 0) return;
+  const plan = getTodayPlan();
+  const day = getPlanDay();
+  const todayWords = getTodayWords();
+  const todayNew = getNewVocabWords(todayWords);
+  const todayDue = getDueVocabWords(todayWords);
+  const todayDone = todayWords.length - todayNew.length;
+  const todayTarget = todayWords.length;
+
+  // Header
+  document.getElementById('plan-day-label').textContent = `Day ${day} / 14`;
+  document.getElementById('plan-level-label').textContent = plan.label;
+  document.getElementById('plan-today-remaining').textContent = todayNew.length + todayDue.length;
+  document.getElementById('plan-today-bar').style.width = `${(todayDone / todayTarget) * 100}%`;
+  document.getElementById('plan-today-done').textContent = `${todayDone}개 완료`;
+  document.getElementById('plan-today-total').textContent = `목표 ${todayTarget}개`;
+
+  if (day >= 13) {
+    document.getElementById('plan-header-sub').textContent = '총복습 기간';
+  }
+
+  // Render 5 sessions
+  const sessContainer = document.getElementById('plan-sessions');
+  let prevTime = '';
+  let html = '';
+
+  for (const sess of SESSIONS) {
+    const done = isSessionDone(sess.id);
+    // Time divider
+    if (sess.time !== prevTime) {
+      html += `<div style="font-size:12px; color:var(--warning); margin:12px 0 6px; font-weight:600;">${sess.time}</div>`;
+      prevTime = sess.time;
+    }
+
+    // Calculate what this session will have
+    let sessDesc = sess.desc;
+    if (!done) {
+      if (sess.type === 'new') {
+        const n = Math.min(getNewVocabWords(todayWords).length, sess.size);
+        sessDesc = n > 0 ? `처음 보는 단어 ${n}개 학습` : '새 단어 완료! 복습으로 진행';
+      } else if (sess.type === 'today_review') {
+        const learned = getTodayLearnedWords().length;
+        sessDesc = learned > 0 ? `오늘 배운 ${learned}개 중 ${Math.min(learned, sess.size)}개 재시험` : '아직 학습한 단어 없음';
+      } else if (sess.type === 'today_weak') {
+        const weak = getTodayWeakWords().length;
+        sessDesc = weak > 0 ? `틀렸거나 느린 단어 ${Math.min(weak, sess.size)}개 복습` : '복습할 단어 없음';
+      }
+    }
+
+    if (done) {
+      const isRepeatable = sess.type === 'today_review' || sess.type === 'today_weak';
+      html += `<div class="card" style="padding:12px 16px; background: #22c55e15; border: 1px solid #22c55e33;" ${isRepeatable ? `data-sess-id="${sess.id}" data-sess-type="${sess.type}"` : ''}>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="font-size:24px;">${sess.icon}</div>
+          <div style="flex:1;">
+            <div class="card-title" style="font-size:14px; color:var(--success);">${sess.name} - 학습완료!</div>
+            <div class="card-sub" style="color:${isRepeatable ? 'var(--warning)' : 'var(--success)'};">${isRepeatable ? '한 번 더 복습하기' : '완료!'}</div>
+          </div>
+          <div style="color:var(--success); font-size:20px;">${isRepeatable ? '↻' : '✓'}</div>
+        </div>
+      </div>`;
+    } else {
+      html += `<div class="card" style="padding:12px 16px;" data-sess-id="${sess.id}" data-sess-type="${sess.type}">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="font-size:24px;">${sess.icon}</div>
+          <div style="flex:1;">
+            <div class="card-title" style="font-size:14px;">${sess.name}</div>
+            <div class="card-sub">${sessDesc}</div>
+          </div>
+          <div style="color:var(--accent); font-size:20px;">›</div>
+        </div>
+      </div>`;
+    }
+  }
+  sessContainer.innerHTML = html;
+  sessContainer.querySelectorAll('.card[data-sess-id]').forEach(card => {
+    card.addEventListener('click', () => startPlanSession(parseInt(card.dataset.sessId), card.dataset.sessType));
+  });
+
+  // Overall stats
+  let mastered = 0, learning = 0, due = 0;
+  for (const w of hskWords) {
+    const s = getVocabSRS(w.id);
+    if (s.level >= 5) mastered++;
+    else if (s.level > 0) learning++;
+    if (s.level > 0 && s.nextReview <= Date.now()) due++;
+    else if (s.level === 0 && (s.correct > 0 || s.wrong > 0)) due++;
+  }
+  document.getElementById('v-mastered2').textContent = mastered;
+  document.getElementById('v-learning').textContent = learning;
+  document.getElementById('v-due').textContent = due;
+
+  const learnedCount = mastered + learning;
+  document.getElementById('vocab-progress-fill').style.width = `${(learnedCount / 1200) * 100}%`;
+  document.getElementById('vocab-progress-text').textContent = `${learnedCount} / 1200`;
+
+  let totalTime = 0, timeCount = 0;
+  for (const w of hskWords) {
+    const s = getVocabSRS(w.id);
+    if (s.avgTime > 0) { totalTime += s.avgTime; timeCount++; }
+  }
+  document.getElementById('vocab-avg-speed').textContent = `평균 응답: ${timeCount > 0 ? (totalTime / timeCount / 1000).toFixed(1) : '-'}초`;
+}
+
+function filterVocab() {} // no longer needed but keep for compatibility
+
+// Get today's words that have been learned (at least 1 correct)
+function getTodayLearnedWords() {
+  return getTodayWords().filter(w => {
+    const s = getVocabSRS(w.id);
+    return s.correct > 0 || s.wrong > 0;
+  });
+}
+
+// Get today's words that were wrong or slow (avgTime > 5s)
+function getTodayWeakWords() {
+  return getTodayWords().filter(w => {
+    const s = getVocabSRS(w.id);
+    if (s.wrong > 0 && s.level < 3) return true; // has wrong answers
+    if (s.avgTime > 5000 && s.level < 5) return true; // slow
+    if (s.level === 0 && (s.correct > 0 || s.wrong > 0)) return true; // reset to 0
+    return false;
+  });
+}
+
+// --- Plan Session ---
+function startPlanSession(sessionId, type) {
+  const todayWords = getTodayWords();
+  const sess = SESSIONS.find(s => s.id === sessionId);
+  const size = sess ? sess.size : 30;
+  let queue = [];
+
+  if (type === 'new') {
+    // New words from today's plan
+    const newW = getNewVocabWords(todayWords).slice(0, size);
+    queue.push(...newW);
+    // If no new words left, fall back to review today's words
+    if (queue.length === 0) {
+      const learned = getTodayLearnedWords().sort(() => Math.random() - 0.5);
+      queue.push(...learned.slice(0, size));
+    }
+  } else if (type === 'today_review') {
+    // Re-quiz words learned today (random selection)
+    const learned = getTodayLearnedWords().sort(() => Math.random() - 0.5);
+    queue.push(...learned.slice(0, size));
+  } else if (type === 'today_weak') {
+    // Weak words: wrong or slow from today
+    const weak = getTodayWeakWords().sort(() => Math.random() - 0.5);
+    queue.push(...weak.slice(0, size));
+    // If not enough weak, add random from today
+    if (queue.length < 10) {
+      const learned = getTodayLearnedWords().filter(w => !queue.find(q => q.id === w.id)).sort(() => Math.random() - 0.5);
+      queue.push(...learned.slice(0, size - queue.length));
+    }
+  } else {
+    // Mixed fallback
+    const newW = getNewVocabWords(todayWords).slice(0, Math.floor(size / 2));
+    const dueW = getDueVocabWords(todayWords).slice(0, Math.floor(size / 2));
+    queue.push(...dueW, ...newW);
+  }
+
+  if (queue.length === 0) {
+    toast('이 세션에서 학습할 단어가 없습니다');
+    return;
+  }
+
+  // Shuffle
+  queue.sort(() => Math.random() - 0.5);
+
+  vsState = {
+    queue,
+    current: 0,
+    score: 0,
+    totalAnswered: 0,
+    wrongQueue: [],
+    startTime: 0,
+    answered: false,
+    results: [],
+    sessionId: sessionId || 0
+  };
+
+  showPage('vocabsession');
+  renderVocabQuestion();
+}
+
+// Legacy compat
+function startVocabSession() { startPlanSession(0, 'mixed'); }
+
+function confirmQuitVocab() {
+  if (confirm('학습을 종료할까요?')) {
+    showPage('vocab');
+    updateVocabPage();
+  }
+}
+
+function renderVocabQuestion() {
+  // Check if we're done with main queue AND wrong queue
+  if (vsState.current >= vsState.queue.length) {
+    if (vsState.wrongQueue.length > 0) {
+      // Retry wrong words
+      vsState.queue = [...vsState.wrongQueue];
+      vsState.wrongQueue = [];
+      vsState.current = 0;
+      toast('틀린 단어 다시 복습!');
+    } else {
+      showVocabResult();
+      return;
+    }
+  }
+
+  const w = vsState.queue[vsState.current];
+  const total = vsState.queue.length;
+  document.getElementById('vs-counter').textContent = `${vsState.current + 1}/${total}`;
+  document.getElementById('vs-progress').style.width = `${(vsState.current / total) * 100}%`;
+  vsState.answered = false;
+  vsState.startTime = Date.now();
+
+  // Build 4 options: 1 correct + 3 wrong from same level (prefer) or nearby
+  const pool = hskWords.filter(x => x.id !== w.id && x.sentence);
+  const sameLvl = pool.filter(x => x.level === w.level).sort(() => Math.random() - 0.5);
+  const otherLvl = pool.filter(x => x.level !== w.level).sort(() => Math.random() - 0.5);
+  const wrongs = [...sameLvl, ...otherLvl].slice(0, 3);
+  const options = [w, ...wrongs].sort(() => Math.random() - 0.5);
+
+  const sent = w.sentence;
+  const content = document.getElementById('vs-content');
+
+  // Escape HTML for safe rendering
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  content.innerHTML = `
+    <div class="sq-ko">${esc(sent.ko)}</div>
+    <div class="sq-sentence">${esc(sent.blank).replace('___', '<span class="sq-blank" id="sq-blank">\u3000\u3000</span>')}</div>
+    ${isIhap(w) ? `<div style="text-align:center;margin-bottom:8px;"><span style="font-size:11px;padding:3px 10px;background:#f472b622;color:#f472b6;border-radius:6px;font-weight:700;">이합동사 離合動詞</span></div>` : ''}
+    <div class="mc-grid" id="mc-grid">
+      ${options.map(o => `
+        <button class="mc-option" data-id="${o.id}" data-correct="${o.id === w.id}" data-word-id="${w.id}">
+          ${esc(o.chinese)}
+          ${isIhap(o) ? '<div style="font-size:9px;color:#f472b6;font-weight:700;">이합</div>' : ''}
+          <div class="mc-pinyin">${esc(o.pinyin)}</div>
+          <div class="mc-meaning">${esc(o.meaning)}</div>
+        </button>
+      `).join('')}
+    </div>
+    <div id="vs-next" style="display:none;">
+      <button class="btn btn-primary btn-block" id="vs-next-btn">다음</button>
+    </div>
+  `;
+
+  // Event delegation instead of inline onclick
+  document.querySelectorAll('#mc-grid .mc-option').forEach(btn => {
+    btn.addEventListener('click', function() {
+      answerVocab(this, this.dataset.correct === 'true', parseInt(this.dataset.wordId));
+    });
+  });
+  document.getElementById('vs-next-btn').addEventListener('click', nextVocabQuestion);
+}
+
+function answerVocab(el, isCorrect, wordId) {
+  if (vsState.answered) return;
+  vsState.answered = true;
+  const elapsed = Date.now() - vsState.startTime;
+  const w = vsState.queue[vsState.current];
+
+  vsState.totalAnswered++;
+  if (isCorrect) vsState.score++;
+
+  // Update SRS
+  updateVocabSRS(wordId, isCorrect, elapsed);
+  recordReview();
+
+  // If wrong, add to retry queue + wrong items tracker
+  if (!isCorrect) {
+    vsState.wrongQueue.push(w);
+    addWrongItem('vocab', { chinese: w.chinese, pinyin: w.pinyin, meaning: w.meaning, sentence: w.sentence?.zh || '', sentenceKo: w.sentence?.ko || '' });
+  }
+
+  // Save result
+  vsState.results.push({ word: w, correct: isCorrect, time: elapsed });
+
+  // Update blank
+  const blank = document.getElementById('sq-blank');
+  if (blank) {
+    blank.textContent = w.sentence.answer;
+    blank.classList.add(isCorrect ? 'filled' : 'wrong-fill');
+  }
+
+  // 이합동사: highlight + explanation
+  if (isIhap(w) && w.chinese.length >= 2) {
+    const sentEl = document.querySelector('.sq-sentence');
+    if (sentEl) sentEl.innerHTML = highlightIhap(sentEl.textContent, w.chinese);
+    const koEl = document.querySelector('.sq-ko');
+    if (koEl) koEl.innerHTML += buildIhapNote(w.chinese);
+  }
+
+  // Highlight options and reveal all meanings
+  document.querySelectorAll('#mc-grid .mc-option').forEach(btn => {
+    const btnId = parseInt(btn.dataset.id);
+    btn.classList.add('reveal'); // show meaning for all
+    if (btnId === wordId) {
+      btn.classList.add('correct');
+    } else if (btn === el && !isCorrect) {
+      btn.classList.add('wrong');
+    } else {
+      btn.classList.add('dim');
+    }
+    btn.style.pointerEvents = 'none';
+  });
+
+  // Show speed feedback + next button
+  const speedText = elapsed < 3000 ? '빠름!' : elapsed < 5000 ? '' : '천천히...';
+  const speedColor = elapsed < 3000 ? 'var(--success)' : elapsed < 5000 ? 'var(--text2)' : 'var(--warning)';
+  const sent = w.sentence;
+  const nextDiv = document.getElementById('vs-next');
+  nextDiv.style.display = 'block';
+  nextDiv.innerHTML = `
+    <div style="text-align:center; margin-bottom:8px;">
+      <span style="font-size:13px; color:${speedColor};">${(elapsed/1000).toFixed(1)}초 ${speedText}</span>
+    </div>
+    <button class="btn btn-primary btn-block" id="vs-next-btn2">다음</button>
+  `;
+  document.getElementById('vs-next-btn2').addEventListener('click', nextVocabQuestion);
+}
+
+function nextVocabQuestion() {
+  vsState.current++;
+  renderVocabQuestion();
+}
+
+function showVocabResult() {
+  const total = vsState.totalAnswered;
+  const score = vsState.score;
+  const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+  const avgTime = vsState.results.length > 0
+    ? (vsState.results.reduce((sum, r) => sum + r.time, 0) / vsState.results.length / 1000).toFixed(1)
+    : '-';
+
+  const wrongWords = vsState.results.filter(r => !r.correct);
+  const content = document.getElementById('vs-content');
+  content.innerHTML = `
+    <div class="result-screen">
+      <div class="result-score">${pct}%</div>
+      <div class="result-detail">${score}/${total} 정답 · 평균 ${avgTime}초</div>
+      <div style="margin-bottom:24px; color:var(--text2);">
+        ${pct >= 90 ? '완벽해요!' : pct >= 70 ? '잘하고 있어요!' : '틀린 단어를 다시 복습해보세요!'}
+      </div>
+      ${wrongWords.length > 0 ? `
+        <div style="text-align:left; margin-bottom:16px;">
+          <div style="font-size:13px; color:var(--text2); margin-bottom:8px;">틀린 단어 (다음 세션에 다시 나옵니다)</div>
+          ${wrongWords.map(r => `
+            <div style="display:flex; justify-content:space-between; padding:8px 12px; background:var(--card); border-radius:8px; margin-bottom:4px;">
+              <span style="font-size:16px; font-weight:600;">${r.word.chinese} <span style="font-size:12px; color:var(--warning);">${r.word.pinyin}</span></span>
+              <span style="font-size:13px; color:var(--text2);">${r.word.meaning}</span>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+      <button class="btn btn-primary btn-block" id="vs-result-back">돌아가기</button>
+    </div>`;
+
+  content.querySelector('#vs-result-back').addEventListener('click', () => { showPage('vocab'); updateVocabPage(); });
+  document.getElementById('vs-counter').textContent = '완료!';
+  document.getElementById('vs-progress').style.width = '100%';
+
+  // Mark session as done
+  if (vsState.sessionId > 0) markSessionDone(vsState.sessionId);
+}
+
+// =================== INIT ===================
+loadData();
+loadHskWords();
+
+// Register service worker for PWA - force update on every load
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => reg.update());
+  });
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    reg.update();
+  }).catch(() => {});
+  // Purge old caches
+  if (window.caches) {
+    caches.keys().then(keys => keys.forEach(k => { if (k !== 'hsk4-v13') caches.delete(k); }));
+  }
+}
+</script>
+</body>
+</html>
