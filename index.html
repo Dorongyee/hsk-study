@@ -168,25 +168,6 @@ body {
 .flashcard .hidden { visibility: hidden; }
 .flashcard .revealed { visibility: visible; }
 
-/* Audio player */
-.audio-player {
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 20px; margin-bottom: 12px;
-}
-.audio-controls {
-  display: flex; align-items: center; gap: 12px;
-}
-.audio-controls button {
-  width: 48px; height: 48px; border-radius: 50%;
-  border: none; background: var(--accent); color: white;
-  font-size: 20px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.audio-info { flex: 1; }
-.audio-info .track-name { font-size: 14px; font-weight: 600; }
-.audio-info .track-detail { font-size: 12px; color: var(--text2); }
-
 /* Stats */
 .stat-grid {
   display: grid; grid-template-columns: 1fr 1fr;
@@ -330,6 +311,36 @@ body {
   font-size: 14px; color: var(--text2); text-align: center;
   margin-bottom: 20px; line-height: 1.5;
 }
+.sq-pinyin {
+  font-size: 14px; color: var(--warning); text-align: center;
+  margin: -8px 0 14px; line-height: 1.5; letter-spacing: 0.5px;
+}
+.sq-pinyin .sq-pinyin-blank {
+  color: var(--accent); font-weight: 700;
+}
+.sq-words {
+  margin-top: 12px; padding: 12px;
+  background: var(--card2); border-radius: 12px;
+}
+.sq-words-title {
+  font-size: 12px; color: var(--text2); margin-bottom: 8px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.sq-word-row {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 6px 0; border-bottom: 1px solid #2a2a3e;
+}
+.sq-word-row:last-child { border-bottom: none; }
+.sq-word-zh {
+  font-size: 17px; font-weight: 600; min-width: 56px;
+}
+.sq-word-py {
+  font-size: 12px; color: var(--warning); min-width: 72px;
+}
+.sq-word-ko {
+  font-size: 13px; color: var(--text); flex: 1;
+}
+.sq-word-row.answer-word .sq-word-zh { color: var(--accent); }
 .sq-timer {
   font-size: 12px; color: var(--text2); text-align: center; margin-bottom: 8px;
 }
@@ -428,10 +439,6 @@ body {
       <div class="card-title" style="font-size: 18px;">단어 학습</div>
       <div class="card-sub" style="color: #ddd;" id="home-vocab-desc">14일 플랜 - 예문 빈칸 채우기</div>
     </div>
-    <div class="card" onclick="showPage('audio')">
-      <div class="card-title">듣기 연습</div>
-      <div class="card-sub">급수별 단어장 MP3 듣기</div>
-    </div>
     <div class="card" onclick="showPage('typing')">
       <div class="card-title">타이핑 연습</div>
       <div class="card-sub">IBT 대비 중국어 입력 · 어순 배열</div>
@@ -516,34 +523,6 @@ body {
       <span id="wq-score">0</span>
     </div>
     <div id="wq-content"></div>
-  </div>
-
-  <!-- Audio Page -->
-  <div id="page-audio" class="page">
-    <button class="back-btn" onclick="showPage('home')">&lt; 뒤로</button>
-    <div class="page-header">듣기 연습</div>
-    <div class="chips" id="audio-level-chips">
-      <div class="chip active" data-level="1-2" onclick="filterAudio('1-2')">1-2</div>
-      <div class="chip" data-level="3" onclick="filterAudio('3')">3</div>
-      <div class="chip" data-level="4" onclick="filterAudio('4')">4</div>
-    </div>
-    <div id="audio-list"></div>
-    <div class="audio-player" id="audio-player" style="display:none; position:fixed; bottom:72px; left:8px; right:8px; max-width:464px; margin:0 auto;">
-      <div class="audio-controls">
-        <button onclick="playPrev()" style="width:36px;height:36px;font-size:14px;background:var(--accent2);">&#9664;&#9664;</button>
-        <button onclick="togglePlay()" id="play-btn">&#9654;</button>
-        <button onclick="playNext()" style="width:36px;height:36px;font-size:14px;background:var(--accent2);">&#9654;&#9654;</button>
-        <div class="audio-info">
-          <div class="track-name" id="track-name">-</div>
-          <div class="track-detail" id="track-detail">-</div>
-        </div>
-      </div>
-      <div style="display:flex; align-items:center; gap:8px; margin-top:10px;">
-        <span id="audio-current" style="font-size:11px; color:var(--text2); min-width:36px;">0:00</span>
-        <input type="range" id="audio-seek" min="0" max="100" value="0" style="flex:1; height:4px; accent-color:var(--accent); cursor:pointer;">
-        <span id="audio-duration" style="font-size:11px; color:var(--text2); min-width:36px;">0:00</span>
-      </div>
-    </div>
   </div>
 
   <!-- Typing Page -->
@@ -686,10 +665,6 @@ body {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
     홈
   </button>
-  <button class="nav-item" onclick="showPage('audio')" data-page="audio">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-    듣기
-  </button>
   <button class="nav-item" onclick="showPage('vocab')" data-page="vocab">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M8 7h8M8 11h6"/></svg>
     단어
@@ -779,7 +754,6 @@ async function loadData() {
   updateHomeStats();
   renderTestList();
   renderNoteCategories();
-  renderAudioList('1-2');
   loadTypingQuestion();
 }
 
@@ -1349,131 +1323,6 @@ function showWordQuizResult() {
       <button class="btn btn-primary btn-block" id="wq-result-back">돌아가기</button>
     </div>`;
   wqContent.querySelector('#wq-result-back').addEventListener('click', () => showPage('notes'));
-}
-
-// =================== AUDIO ===================
-let audioState = { level: '1-2', tracks: [], currentTrack: -1 };
-let audioEl = null;
-
-function getAudioPath(level, trackNum) {
-  const folderMap = { '1-2': 'level-12', '3': 'level-3', '4': 'level-4' };
-  const prefix = level === '1-2' ? '1,2' : level;
-  const num = String(trackNum).padStart(2, '0');
-  return `audio/${folderMap[level]}/Track ${prefix}-${num}.mp3`;
-}
-
-function filterAudio(level) {
-  document.querySelectorAll('#audio-level-chips .chip').forEach(c => {
-    c.classList.toggle('active', c.dataset.level === level);
-  });
-  renderAudioList(level);
-}
-
-function renderAudioList(level) {
-  audioState.level = level;
-  const counts = { '1-2': 19, '3': 22, '4': 42 };
-  const count = counts[level] || 0;
-  audioState.tracks = Array.from({ length: count }, (_, i) => i + 1);
-
-  const container = document.getElementById('audio-list');
-  container.innerHTML = audioState.tracks.map(t => {
-    const prefix = level === '1-2' ? '1,2' : level;
-    return `<div class="card" data-audio-level="${level}" data-audio-track="${t}" style="padding:12px 16px;">
-      <div style="display:flex; align-items:center; gap:12px;">
-        <div style="width:36px;height:36px;border-radius:50%;background:var(--accent2);display:flex;align-items:center;justify-content:center;">&#9654;</div>
-        <div>
-          <div class="card-title" style="font-size:14px;">Track ${prefix}-${String(t).padStart(2, '0')}</div>
-          <div class="card-sub">Level ${level}</div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-  container.querySelectorAll('.card[data-audio-track]').forEach(card => {
-    card.addEventListener('click', () => playTrack(card.dataset.audioLevel, parseInt(card.dataset.audioTrack)));
-  });
-}
-
-function formatTime(sec) {
-  if (!sec || isNaN(sec)) return '0:00';
-  const m = Math.floor(sec / 60);
-  const s = Math.floor(sec % 60);
-  return m + ':' + String(s).padStart(2, '0');
-}
-
-function playTrack(level, trackNum) {
-  if (!audioEl) {
-    audioEl = new Audio();
-    // Seek bar: update as audio plays
-    audioEl.addEventListener('timeupdate', () => {
-      if (!audioEl.duration) return;
-      const pct = (audioEl.currentTime / audioEl.duration) * 100;
-      const seekBar = document.getElementById('audio-seek');
-      if (seekBar && !seekBar._dragging) seekBar.value = pct;
-      const cur = document.getElementById('audio-current');
-      if (cur) cur.textContent = formatTime(audioEl.currentTime);
-    });
-    audioEl.addEventListener('loadedmetadata', () => {
-      const dur = document.getElementById('audio-duration');
-      if (dur) dur.textContent = formatTime(audioEl.duration);
-      const seekBar = document.getElementById('audio-seek');
-      if (seekBar) seekBar.value = 0;
-      const cur = document.getElementById('audio-current');
-      if (cur) cur.textContent = '0:00';
-    });
-    // Seek bar: user drags
-    const seekBar = document.getElementById('audio-seek');
-    if (seekBar) {
-      seekBar.addEventListener('input', () => {
-        seekBar._dragging = true;
-        if (audioEl.duration) {
-          audioEl.currentTime = (seekBar.value / 100) * audioEl.duration;
-        }
-      });
-      seekBar.addEventListener('change', () => { seekBar._dragging = false; });
-    }
-  }
-
-  const path = getAudioPath(level, trackNum);
-  audioEl.src = path;
-  audioEl.play().catch(e => toast('음성 파일을 찾을 수 없습니다'));
-
-  audioState.currentTrack = trackNum;
-  const prefix = level === '1-2' ? '1,2' : level;
-  document.getElementById('track-name').textContent = `Track ${prefix}-${String(trackNum).padStart(2, '0')}`;
-  document.getElementById('track-detail').textContent = `Level ${level}`;
-  document.getElementById('audio-player').style.display = 'block';
-  document.getElementById('play-btn').innerHTML = '&#9646;&#9646;';
-  document.getElementById('audio-current').textContent = '0:00';
-  document.getElementById('audio-duration').textContent = '0:00';
-
-  audioEl.onended = () => {
-    document.getElementById('play-btn').innerHTML = '&#9654;';
-  };
-}
-
-function togglePlay() {
-  if (!audioEl) return;
-  if (audioEl.paused) {
-    audioEl.play();
-    document.getElementById('play-btn').innerHTML = '&#9646;&#9646;';
-  } else {
-    audioEl.pause();
-    document.getElementById('play-btn').innerHTML = '&#9654;';
-  }
-}
-
-function playNext() {
-  const next = audioState.currentTrack + 1;
-  if (next <= audioState.tracks.length) {
-    playTrack(audioState.level, next);
-  }
-}
-
-function playPrev() {
-  const prev = audioState.currentTrack - 1;
-  if (prev >= 1) {
-    playTrack(audioState.level, prev);
-  }
 }
 
 // =================== TYPING PRACTICE ===================
@@ -2598,6 +2447,7 @@ function renderVocabQuestion() {
   content.innerHTML = `
     <div class="sq-ko">${esc(sent.ko)}</div>
     <div class="sq-sentence">${esc(sent.blank).replace('___', '<span class="sq-blank" id="sq-blank">\u3000\u3000</span>')}</div>
+    <div class="sq-pinyin" id="sq-pinyin">${esc(sent.blank).split('___').map(p => toPinyin(p)).join(' <span class="sq-pinyin-blank">___</span> ')}</div>
     ${isIhap(w) ? `<div style="text-align:center;margin-bottom:8px;"><span style="font-size:11px;padding:3px 10px;background:#f472b622;color:#f472b6;border-radius:6px;font-weight:700;">이합동사 離合動詞</span></div>` : ''}
     <div class="mc-grid" id="mc-grid">
       ${options.map(o => `
@@ -2621,6 +2471,43 @@ function renderVocabQuestion() {
     });
   });
   document.getElementById('vs-next-btn').addEventListener('click', nextVocabQuestion);
+}
+
+// Build list of all words in a sentence with their meanings
+function buildSentenceWordsList(sentence, answerWord) {
+  if (!sentence) return '';
+  const segments = segmentSentence(sentence);
+  const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const rows = [];
+  const seen = new Set();
+  for (const seg of segments) {
+    if (!seg) continue;
+    if (/^[\s。？！，、；：""''（）「」\.\,\?\!\:\;]+$/.test(seg)) continue;
+    if (seen.has(seg)) continue;
+    seen.add(seg);
+
+    let w = hskWords.find(x => x.chinese === seg);
+    if (!w && seg.length >= 2) {
+      w = hskWords.find(x => seg.includes(x.chinese) && x.chinese.length >= 2);
+    }
+    const pinyin = w ? w.pinyin : toPinyin(seg);
+    const meaning = w ? w.meaning : '';
+    const isAnswer = answerWord && seg === answerWord;
+    rows.push(`
+      <div class="sq-word-row${isAnswer ? ' answer-word' : ''}">
+        <div class="sq-word-zh">${escHtml(seg)}</div>
+        <div class="sq-word-py">${escHtml(pinyin || '')}</div>
+        <div class="sq-word-ko">${escHtml(meaning) || '<span style="color:var(--text2);">-</span>'}</div>
+      </div>
+    `);
+  }
+  if (rows.length === 0) return '';
+  return `
+    <div class="sq-words">
+      <div class="sq-words-title">문장 속 단어</div>
+      ${rows.join('')}
+    </div>
+  `;
 }
 
 function answerVocab(el, isCorrect, wordId) {
@@ -2674,14 +2561,24 @@ function answerVocab(el, isCorrect, wordId) {
     btn.style.pointerEvents = 'none';
   });
 
-  // Show speed feedback + next button
+  // Reveal full pinyin (with answer word filled in)
+  const pinyinEl = document.getElementById('sq-pinyin');
+  if (pinyinEl) {
+    pinyinEl.innerHTML = toPinyin(w.sentence.zh || w.sentence.blank.replace('___', w.sentence.answer));
+    pinyinEl.style.color = isCorrect ? 'var(--success)' : 'var(--warning)';
+  }
+
+  // Show speed feedback + words list + next button
   const speedText = elapsed < 3000 ? '빠름!' : elapsed < 5000 ? '' : '천천히...';
   const speedColor = elapsed < 3000 ? 'var(--success)' : elapsed < 5000 ? 'var(--text2)' : 'var(--warning)';
   const sent = w.sentence;
+  const fullSentence = sent.zh || sent.blank.replace('___', sent.answer);
+  const wordsList = buildSentenceWordsList(fullSentence, sent.answer);
   const nextDiv = document.getElementById('vs-next');
   nextDiv.style.display = 'block';
   nextDiv.innerHTML = `
-    <div style="text-align:center; margin-bottom:8px;">
+    ${wordsList}
+    <div style="text-align:center; margin:12px 0 8px;">
       <span style="font-size:13px; color:${speedColor};">${(elapsed/1000).toFixed(1)}초 ${speedText}</span>
     </div>
     <button class="btn btn-primary btn-block" id="vs-next-btn2">다음</button>
