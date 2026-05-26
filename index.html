@@ -403,117 +403,14 @@ body {
   transition: left .2s;
 }
 .toggle.on::after { left: 24px; }
-
-/* =================== AUTH OVERLAY =================== */
-.auth-overlay {
-  position: fixed; inset: 0; z-index: 9999;
-  background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  padding: 16px;
-}
-.auth-card {
-  width: 100%; max-width: 380px;
-  background: var(--card); border-radius: var(--radius);
-  padding: 24px;
-}
-.auth-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-.auth-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
-.auth-tabs {
-  display: flex; gap: 4px; margin-bottom: 20px;
-  background: var(--card2); border-radius: 10px; padding: 4px;
-}
-.auth-tab {
-  flex: 1; padding: 10px; border: none; background: transparent;
-  color: var(--text2); font-size: 14px; font-weight: 600;
-  border-radius: 8px; cursor: pointer; transition: all .2s;
-}
-.auth-tab.active { background: var(--accent); color: white; }
-.auth-field { margin-bottom: 12px; }
-.auth-field label {
-  display: block; font-size: 12px; color: var(--text2); margin-bottom: 4px;
-}
-.auth-input {
-  width: 100%; padding: 12px 14px;
-  background: var(--card2); border: 2px solid #333; border-radius: 10px;
-  color: var(--text); font-size: 15px; outline: none;
-  transition: border-color .2s;
-}
-.auth-input:focus { border-color: var(--accent); }
-.auth-submit {
-  width: 100%; padding: 13px;
-  background: var(--accent); color: white;
-  border: none; border-radius: 10px;
-  font-size: 15px; font-weight: 600; cursor: pointer;
-  margin-top: 6px;
-}
-.auth-submit:disabled { opacity: 0.5; cursor: wait; }
-.auth-error {
-  background: #ef444422; color: var(--danger);
-  padding: 10px 12px; border-radius: 8px;
-  font-size: 13px; margin-bottom: 12px; display: none;
-}
-.auth-error.show { display: block; }
-.auth-hint {
-  font-size: 11px; color: var(--text2); margin-top: 8px; text-align: center;
-}
-
-/* Header user bar */
-.header-bar {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 8px; font-size: 12px; color: var(--text2);
-}
-.header-user { display: flex; align-items: center; gap: 8px; }
-.header-user-name { color: var(--text); font-weight: 600; }
-.header-logout {
-  background: transparent; border: 1px solid #333;
-  color: var(--text2); padding: 4px 10px; border-radius: 8px;
-  font-size: 11px; cursor: pointer;
-}
-.header-logout:hover { border-color: var(--accent); color: var(--accent); }
 </style>
 </head>
 <body>
-<!-- Auth overlay (shown until logged in) -->
-<div class="auth-overlay" id="auth-overlay" style="display:none;">
-  <div class="auth-card">
-    <div class="auth-title">HSK 학습</div>
-    <div class="auth-sub">로그인하면 단어 진도/틀린 단어/통계가 본인 계정에 저장됩니다</div>
-    <div class="auth-tabs">
-      <button class="auth-tab active" data-tab="login" type="button">로그인</button>
-      <button class="auth-tab" data-tab="signup" type="button">회원가입</button>
-    </div>
-    <div class="auth-error" id="auth-error"></div>
-    <form id="auth-form" autocomplete="off">
-      <div class="auth-field">
-        <label for="auth-username">아이디</label>
-        <input type="text" id="auth-username" class="auth-input"
-          autocomplete="username" autocapitalize="off" spellcheck="false"
-          maxlength="20" pattern="[A-Za-z0-9_-]{3,20}"
-          placeholder="영문/숫자/_/- (3~20자)" required>
-      </div>
-      <div class="auth-field">
-        <label for="auth-password">비밀번호</label>
-        <input type="password" id="auth-password" class="auth-input"
-          autocomplete="current-password" maxlength="200"
-          placeholder="최소 4자" required>
-      </div>
-      <button type="submit" class="auth-submit" id="auth-submit">로그인</button>
-      <div class="auth-hint" id="auth-hint">* 데이터는 이 브라우저에만 저장됩니다 (캐시 삭제 시 함께 삭제)</div>
-    </form>
-  </div>
-</div>
 <div class="app">
   <div id="toast" class="toast"></div>
 
   <!-- Home Page -->
   <div id="page-home" class="page active">
-    <div class="header-bar">
-      <div class="header-user">
-        <span>👤</span>
-        <span class="header-user-name" id="header-username">-</span>
-      </div>
-      <button class="header-logout" type="button" onclick="logoutUser()">로그아웃</button>
-    </div>
     <div class="page-header">
       HSK 4급 복습
       <small>IBT 시험 대비 - 출퇴근길 복습용</small>
@@ -788,126 +685,11 @@ let testSets = [];
 let secretNotes = [];
 let srsData = {};
 let stats = { streak: 0, lastDate: '', todayCount: 0, totalReviewed: 0 };
-let showPinyin = false;
-let currentUser = null;
-
-// =================== AUTH / USER NAMESPACE ===================
-// Per-user localStorage namespace: 'hsk4_u_<id>_<key>' when logged in.
-// Global keys (no user prefix): 'hsk4_users', 'hsk4_session'.
-
-const USERNAME_RE = /^[A-Za-z0-9_-]{3,20}$/;
-
-function lsKey(key) {
-  return currentUser ? `hsk4_u_${currentUser.id}_${key}` : `hsk4_${key}`;
-}
-function lsGet(key) { return localStorage.getItem(lsKey(key)); }
-function lsSet(key, val) { localStorage.setItem(lsKey(key), val); }
-function lsRemove(key) { localStorage.removeItem(lsKey(key)); }
-
-function getUsers() {
-  try { return JSON.parse(localStorage.getItem('hsk4_users') || '[]'); }
-  catch(e) { return []; }
-}
-function saveUsers(users) { localStorage.setItem('hsk4_users', JSON.stringify(users)); }
-
-function b64encode(buf) {
-  const bytes = new Uint8Array(buf);
-  let s = '';
-  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-  return btoa(s);
-}
-function b64decode(s) {
-  const bin = atob(s);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
-}
-
-// PBKDF2-SHA256, 100k iterations → 256-bit hash. Salt is 16 random bytes.
-async function hashPassword(password, saltB64) {
-  const enc = new TextEncoder();
-  const salt = saltB64 ? b64decode(saltB64) : crypto.getRandomValues(new Uint8Array(16));
-  const keyMat = await crypto.subtle.importKey(
-    'raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']
-  );
-  const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
-    keyMat, 256
-  );
-  return { hash: b64encode(bits), salt: b64encode(salt) };
-}
-
-// Constant-time string compare to discourage timing leaks
-function safeEqual(a, b) {
-  if (typeof a !== 'string' || typeof b !== 'string') return false;
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
-
-async function signupUser(username, password) {
-  username = String(username || '').trim();
-  password = String(password || '');
-  if (!USERNAME_RE.test(username)) {
-    return { ok: false, error: '아이디는 영문/숫자/_/- 만 사용, 3~20자' };
-  }
-  if (password.length < 4) return { ok: false, error: '비밀번호는 최소 4자' };
-  if (password.length > 200) return { ok: false, error: '비밀번호가 너무 깁니다' };
-  const users = getUsers();
-  if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
-    return { ok: false, error: '이미 사용 중인 아이디' };
-  }
-  const { hash, salt } = await hashPassword(password);
-  const user = { id: crypto.randomUUID(), username, salt, hash, createdAt: Date.now() };
-  users.push(user);
-  saveUsers(users);
-  localStorage.setItem('hsk4_session', user.id);
-  currentUser = user;
-  return { ok: true };
-}
-
-async function loginUser(username, password) {
-  username = String(username || '').trim();
-  password = String(password || '');
-  if (!USERNAME_RE.test(username) || password.length < 1) {
-    return { ok: false, error: '아이디 또는 비밀번호가 올바르지 않습니다' };
-  }
-  const users = getUsers();
-  const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-  if (!user) return { ok: false, error: '아이디 또는 비밀번호가 올바르지 않습니다' };
-  const { hash } = await hashPassword(password, user.salt);
-  if (!safeEqual(hash, user.hash)) {
-    return { ok: false, error: '아이디 또는 비밀번호가 올바르지 않습니다' };
-  }
-  localStorage.setItem('hsk4_session', user.id);
-  currentUser = user;
-  return { ok: true };
-}
-
-function logoutUser() {
-  localStorage.removeItem('hsk4_session');
-  currentUser = null;
-  location.reload();
-}
-
-function restoreSession() {
-  const sessionId = localStorage.getItem('hsk4_session');
-  if (!sessionId) return false;
-  const user = getUsers().find(u => u.id === sessionId);
-  if (!user) { localStorage.removeItem('hsk4_session'); return false; }
-  currentUser = user;
-  return true;
-}
-
-// Safe HTML escape for any user-controlled text in templates
-function escAttr(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
+let showPinyin = JSON.parse(localStorage.getItem('hsk4_showPinyin') ?? 'false');
 
 function togglePinyin() {
   showPinyin = !showPinyin;
-  lsSet('showPinyin', JSON.stringify(showPinyin));
+  localStorage.setItem('hsk4_showPinyin', JSON.stringify(showPinyin));
   document.getElementById('pinyin-toggle').classList.toggle('on', showPinyin);
 }
 
@@ -954,17 +736,12 @@ async function loadData() {
     console.error('Failed to load data:', e);
   }
 
-  // Load saved progress (per current user)
-  srsData = {};
-  stats = { streak: 0, lastDate: '', todayCount: 0, totalReviewed: 0 };
-  const saved = lsGet('srs');
-  if (saved) { try { srsData = JSON.parse(saved); } catch(e) {} }
+  // Load saved progress
+  const saved = localStorage.getItem('hsk4_srs');
+  if (saved) srsData = JSON.parse(saved);
 
-  const savedStats = lsGet('stats');
-  if (savedStats) { try { stats = JSON.parse(savedStats); } catch(e) {} }
-
-  const sp = lsGet('showPinyin');
-  if (sp !== null) { try { showPinyin = JSON.parse(sp); } catch(e) {} }
+  const savedStats = localStorage.getItem('hsk4_stats');
+  if (savedStats) stats = JSON.parse(savedStats);
 
   // 확인 streak
   const today = new Date().toDateString();
@@ -980,8 +757,8 @@ async function loadData() {
   loadTypingQuestion();
 }
 
-function saveSRS() { lsSet('srs', JSON.stringify(srsData)); }
-function saveStats() { lsSet('stats', JSON.stringify(stats)); }
+function saveSRS() { localStorage.setItem('hsk4_srs', JSON.stringify(srsData)); }
+function saveStats() { localStorage.setItem('hsk4_stats', JSON.stringify(stats)); }
 
 function recordReview() {
   const today = new Date().toDateString();
@@ -1107,7 +884,8 @@ function filterTestSets(level) {
 }
 
 function getSetCompletion(setNum) {
-  return parseInt(lsGet(`set_${setNum}_best`) || '0');
+  const key = `set_${setNum}_best`;
+  return parseInt(localStorage.getItem(key) || '0');
 }
 
 // =================== SENTENCE QUIZ ===================
@@ -1266,8 +1044,8 @@ function showQuizResult() {
 
   // Save best score
   const bestKey = `set_${currentQuiz.set.set}_best`;
-  const prev = parseInt(lsGet(bestKey) || '0');
-  if (score > prev) lsSet(bestKey, score);
+  const prev = parseInt(localStorage.getItem(bestKey) || '0');
+  if (score > prev) localStorage.setItem(bestKey, score);
 
   const setNum = currentQuiz.set.set;
   const quizContent = document.getElementById('quiz-content');
@@ -2170,10 +1948,10 @@ HSK 4급 수준으로 쉽게 설명해주세요. 문장 성분(주어/서술어/
 let wrongFilter = 'all';
 
 function getWrongItems() {
-  try { return JSON.parse(lsGet('wrong') || '[]'); } catch(e) { return []; }
+  return JSON.parse(localStorage.getItem('hsk4_wrong') || '[]');
 }
 function saveWrongItems(items) {
-  lsSet('wrong', JSON.stringify(items));
+  localStorage.setItem('hsk4_wrong', JSON.stringify(items));
 }
 
 function addWrongItem(type, data) {
@@ -2332,17 +2110,16 @@ const SESSIONS = [
 ];
 
 function getPlanState() {
-  let state = null;
-  try { state = JSON.parse(lsGet('plan') || 'null'); } catch(e) {}
+  let state = JSON.parse(localStorage.getItem('hsk4_plan') || 'null');
   if (!state) {
     state = { startDate: new Date().toDateString(), completedSessions: {} };
-    lsSet('plan', JSON.stringify(state));
+    localStorage.setItem('hsk4_plan', JSON.stringify(state));
   }
   return state;
 }
 
 function savePlanState(state) {
-  lsSet('plan', JSON.stringify(state));
+  localStorage.setItem('hsk4_plan', JSON.stringify(state));
 }
 
 function getPlanDay() {
@@ -2853,83 +2630,9 @@ function showVocabResult() {
   if (vsState.sessionId > 0) markSessionDone(vsState.sessionId);
 }
 
-// =================== AUTH UI WIRING ===================
-let authMode = 'login';
-
-function showAuthError(msg) {
-  const el = document.getElementById('auth-error');
-  el.textContent = msg;
-  el.classList.add('show');
-}
-function clearAuthError() {
-  document.getElementById('auth-error').classList.remove('show');
-}
-
-function switchAuthMode(mode) {
-  authMode = mode;
-  document.querySelectorAll('.auth-tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.tab === mode);
-  });
-  document.getElementById('auth-submit').textContent = mode === 'login' ? '로그인' : '가입하고 시작하기';
-  document.getElementById('auth-password').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
-  clearAuthError();
-}
-
-function showAuthOverlay() {
-  document.getElementById('auth-overlay').style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  setTimeout(() => document.getElementById('auth-username').focus(), 50);
-}
-function hideAuthOverlay() {
-  document.getElementById('auth-overlay').style.display = 'none';
-  document.body.style.overflow = '';
-}
-
-document.querySelectorAll('.auth-tab').forEach(t => {
-  t.addEventListener('click', () => switchAuthMode(t.dataset.tab));
-});
-
-document.getElementById('auth-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  clearAuthError();
-  const submitBtn = document.getElementById('auth-submit');
-  submitBtn.disabled = true;
-  const originalLabel = submitBtn.textContent;
-  submitBtn.textContent = '잠시만요...';
-  try {
-    const username = document.getElementById('auth-username').value;
-    const password = document.getElementById('auth-password').value;
-    const result = authMode === 'login'
-      ? await loginUser(username, password)
-      : await signupUser(username, password);
-    if (!result.ok) {
-      showAuthError(result.error);
-      return;
-    }
-    hideAuthOverlay();
-    document.getElementById('auth-password').value = '';
-    await startApp();
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = originalLabel;
-  }
-});
-
-async function startApp() {
-  document.getElementById('header-username').textContent = currentUser ? currentUser.username : '-';
-  await loadData();
-  loadHskWords();
-}
-
 // =================== INIT ===================
-(function bootstrap() {
-  if (restoreSession()) {
-    startApp();
-  } else {
-    showAuthOverlay();
-    switchAuthMode('login');
-  }
-})();
+loadData();
+loadHskWords();
 
 // Register service worker for PWA - force update on every load
 if ('serviceWorker' in navigator) {
